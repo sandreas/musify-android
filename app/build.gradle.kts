@@ -59,10 +59,14 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.koin.android)
-
     implementation(libs.koin.annotations)
     ksp(libs.koin.ksp.compiler)
+
+    implementation (libs.koin.androidx.navigation)
+    implementation (libs.koin.androidx.compose)
+
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.logging.interceptor)
+    implementation(libs.androidx.navigation.compose)
 }
