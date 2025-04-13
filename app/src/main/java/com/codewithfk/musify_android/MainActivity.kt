@@ -21,6 +21,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
 import com.codewithfk.musify_android.ui.feature.home.HomeScreen
 import com.codewithfk.musify_android.ui.feature.login.LoginScreen
+import com.codewithfk.musify_android.ui.feature.onboarding.OnboardingScreen
 import com.codewithfk.musify_android.ui.theme.MusifyAndroidTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -59,7 +60,7 @@ class MainActivity : ComponentActivity() {
             MusifyAndroidTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Box(modifier = Modifier.padding(innerPadding)) {
-                        LoginScreen(
+                        OnboardingScreen(
                             rememberNavController()
                         )
                     }
