@@ -36,6 +36,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.codewithfk.musify_android.R
 import com.codewithfk.musify_android.ui.feature.widgets.HighlightedText
+import com.codewithfk.musify_android.ui.navigation.LoginRoute
+import com.codewithfk.musify_android.ui.navigation.OnboardingRoute
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 
@@ -48,6 +50,13 @@ fun OnboardingScreen(
             when (it) {
                 is OnboardingEvent.showErrorMessage -> {
                     Toast.makeText(navController.context, it.message, Toast.LENGTH_SHORT).show()
+                }
+                is OnboardingEvent.NavigateToLogin -> {
+                    navController.navigate(LoginRoute){
+                        popUpTo(OnboardingRoute) {
+                            inclusive = true
+                        }
+                    }
                 }
             }
         }
@@ -82,9 +91,12 @@ fun OnboardingScreen(
                         modifier = Modifier
                             .align(androidx.compose.ui.Alignment.BottomCenter)
                             .onGloballyPositioned {
-                               val heightPX = it.size.height
+                                val heightPX = it.size.height
                                 cardHeight.value = with(density) { heightPX.toDp() }
-                            }
+                            },
+                        onClick = {
+                            viewModel.onGetStartedClicked()
+                        }
                     )
                 }
             }
@@ -93,7 +105,7 @@ fun OnboardingScreen(
 }
 
 @Composable
-fun OnboardingCard(modifier: Modifier) {
+fun OnboardingCard(modifier: Modifier, onClick: () -> Unit) {
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -135,7 +147,7 @@ fun OnboardingCard(modifier: Modifier) {
                     .background(MaterialTheme.colorScheme.surface)
             )
         }
-        Button(onClick = {}, modifier = Modifier.fillMaxWidth()) {
+        Button(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
             Text("Get Started", style = MaterialTheme.typography.labelLarge)
         }
     }

@@ -6,22 +6,17 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
-import com.codewithfk.musify_android.ui.feature.home.HomeScreen
-import com.codewithfk.musify_android.ui.feature.login.LoginScreen
-import com.codewithfk.musify_android.ui.feature.onboarding.OnboardingScreen
+
+import com.codewithfk.musify_android.ui.navigation.AppNavGraph
+import com.codewithfk.musify_android.ui.navigation.OnboardingRoute
 import com.codewithfk.musify_android.ui.theme.MusifyAndroidTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -60,11 +55,11 @@ class MainActivity : ComponentActivity() {
             MusifyAndroidTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Box(modifier = Modifier.padding(innerPadding)) {
-                        OnboardingScreen(
-                            rememberNavController()
+                        AppNavGraph(
+                            navController = rememberNavController(),
+                            startDestination = OnboardingRoute
                         )
                     }
-
                 }
             }
         }
@@ -72,20 +67,5 @@ class MainActivity : ComponentActivity() {
             delay(2000)
             isSplashScreenVisible = false
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!", modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MusifyAndroidTheme {
-        Greeting("Android")
     }
 }

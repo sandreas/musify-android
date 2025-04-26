@@ -1,10 +1,12 @@
 package com.codewithfk.musify_android.ui.feature.onboarding
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
@@ -18,6 +20,13 @@ class OnboardingViewModel : ViewModel() {
 
     fun fetchData() {
 
+    }
+
+    fun onGetStartedClicked(){
+        viewModelScope.launch {
+            //todo: update the storage to no show the onboarding again.
+            _event.emit(OnboardingEvent.NavigateToLogin)
+        }
     }
 
 }
