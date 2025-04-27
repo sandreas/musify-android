@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.codewithfk.musify_android.ui.feature.home.HomeScreen
 import com.codewithfk.musify_android.ui.feature.login.LoginScreen
 import com.codewithfk.musify_android.ui.feature.onboarding.OnboardingScreen
 import com.codewithfk.musify_android.ui.feature.register.RegisterScreen
@@ -28,9 +29,7 @@ fun AppNavGraph(navController: NavHostController, startDestination: MusifyNavRou
             RegisterScreen(navController)
         }
         composable<HomeRoute> {
-            Log.d("AppNavGraph", "HomeScreen is not implemented yet")
-            Text(text = "Home Screen", style = MaterialTheme.typography.titleLarge)
-            // HomeScreen(navController)
+            HomeScreen(navController)
         }
     }
 }

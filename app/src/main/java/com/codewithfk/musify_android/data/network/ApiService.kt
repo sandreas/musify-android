@@ -1,5 +1,6 @@
 package com.codewithfk.musify_android.data.network
 
+import com.codewithfk.musify_android.data.model.HomeDataResponse
 import com.codewithfk.musify_android.data.model.LoginRequest
 import com.codewithfk.musify_android.data.model.LoginResponse
 import com.codewithfk.musify_android.data.model.RegisterRequest
@@ -21,4 +22,7 @@ interface ApiService {
     suspend fun register(
         @Body registerRequest: RegisterRequest
     ): Response<LoginResponse>
+
+    @GET("/home")
+    suspend fun getHomeData(): Response<HomeDataResponse>
 }

@@ -16,6 +16,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
 
 import com.codewithfk.musify_android.ui.navigation.AppNavGraph
+import com.codewithfk.musify_android.ui.navigation.HomeRoute
 import com.codewithfk.musify_android.ui.navigation.OnboardingRoute
 import com.codewithfk.musify_android.ui.theme.MusifyAndroidTheme
 import kotlinx.coroutines.CoroutineScope
@@ -57,7 +58,7 @@ class MainActivity : ComponentActivity() {
                     Box(modifier = Modifier.padding(innerPadding)) {
                         AppNavGraph(
                             navController = rememberNavController(),
-                            startDestination = OnboardingRoute
+                            startDestination = if(viewModel.isUserLoggedIn()) HomeRoute else OnboardingRoute
                         )
                     }
                 }

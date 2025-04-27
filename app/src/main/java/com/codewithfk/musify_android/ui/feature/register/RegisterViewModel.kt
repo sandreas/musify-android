@@ -15,7 +15,10 @@ import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
-class RegisterViewModel(private val authenticationRepository: AuthenticationRepository) :
+class RegisterViewModel(
+    private val authenticationRepository: AuthenticationRepository,
+    private val musifySession: com.codewithfk.musify_android.data.MusifySession
+) :
     ViewModel() {
 
     private val _state = MutableStateFlow<RegisterState>(RegisterState.Nothing)
@@ -85,9 +88,16 @@ class RegisterViewModel(private val authenticationRepository: AuthenticationRepo
             }
             _state.value = RegisterState.Loading
             try {
-                val request = RegisterRequest(name, email, password)
+                val request = RegisterRequest(name = name, email = email, password = password)
                 when (val response = authenticationRepository.register(request)) {
                     is com.codewithfk.musify_android.data.network.Resource.Success -> {
+                        val loginResponse = response.data
+                        loginResponse.token?.let {
+                            musifySession.saveToken(it)
+                        }
+                        loginResponse.user?.let { user ->
+                            musifySession.saveUserName(user.name!!)
+                        }
                         _state.value = RegisterState.Success
                         _event.emit(RegisterEvent.NavigateToHome)
                     }
