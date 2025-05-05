@@ -43,6 +43,7 @@ import com.codewithfk.musify_android.data.model.Song
 import com.codewithfk.musify_android.ui.feature.widgets.ErrorScreen
 import com.codewithfk.musify_android.ui.feature.widgets.LoadingScreen
 import com.codewithfk.musify_android.ui.feature.widgets.MusifySpacer
+import com.codewithfk.musify_android.ui.navigation.PlaySongRoute
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 import kotlin.random.Random
@@ -55,6 +56,10 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = koinView
             when (it) {
                 is HomeEvent.showErrorMessage -> {
                     Toast.makeText(navController.context, it.message, Toast.LENGTH_SHORT).show()
+                }
+
+                is HomeEvent.onSongClick -> {
+                    navController.navigate(PlaySongRoute(it.songId))
                 }
             }
         }
@@ -71,7 +76,9 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = koinView
             HomeScreenContent(
                 name = viewModel.getUserName(),
                 data = data,
-                onSongClicked = { },
+                onSongClicked = {
+                    viewModel.onSongClicked(it.id)
+                },
                 onAlbumClicked = { }
             )
         }
@@ -87,8 +94,8 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = koinView
 fun HomeScreenContent(
     name: String,
     data: HomeDataResponse,
-    onSongClicked: () -> Unit,
-    onAlbumClicked: () -> Unit
+    onSongClicked: (Song) -> Unit,
+    onAlbumClicked: (Album) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -96,7 +103,7 @@ fun HomeScreenContent(
             .padding(16.dp)
     ) {
         HomeHeader(name, null)
-        ContinueListeningSection(data.continueListening, {})
+        ContinueListeningSection(data.continueListening, onSongClicked)
         MusifySpacer(16.dp)
         TopMixesSection(data.topMixes) {}
         MusifySpacer(16.dp)
@@ -154,7 +161,7 @@ fun HomeHeader(userName: String, userImage: String?) {
 
 
 @Composable
-fun ColumnScope.ContinueListeningSection(list: List<Song>, onItemClick: () -> Unit) {
+fun ColumnScope.ContinueListeningSection(list: List<Song>, onItemClick: (Song) -> Unit) {
     Text("Continue Listening", style = MaterialTheme.typography.titleLarge)
     MusifySpacer(8.dp)
     LazyVerticalGrid(columns = GridCells.Fixed(2)) {
@@ -172,12 +179,12 @@ fun ColumnScope.ContinueListeningSection(list: List<Song>, onItemClick: () -> Un
 }
 
 @Composable
-fun GridSong(song: Song, modifier: Modifier, onClick: () -> Unit) {
+fun GridSong(song: Song, modifier: Modifier, onClick: (Song) -> Unit) {
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))
             .background(Color.Gray)
-            .clickable { onClick() },
+            .clickable { onClick(song) },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Log.d("GridSong", "song: ${song.coverImage}")

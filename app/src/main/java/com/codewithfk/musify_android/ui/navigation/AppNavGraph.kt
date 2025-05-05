@@ -7,9 +7,11 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 import com.codewithfk.musify_android.ui.feature.home.HomeScreen
 import com.codewithfk.musify_android.ui.feature.login.LoginScreen
 import com.codewithfk.musify_android.ui.feature.onboarding.OnboardingScreen
+import com.codewithfk.musify_android.ui.feature.playsong.PlaySongScreen
 import com.codewithfk.musify_android.ui.feature.register.RegisterScreen
 
 
@@ -30,6 +32,10 @@ fun AppNavGraph(navController: NavHostController, startDestination: MusifyNavRou
         }
         composable<HomeRoute> {
             HomeScreen(navController)
+        }
+        composable<PlaySongRoute> {
+            val route = it.toRoute<PlaySongRoute>()
+            PlaySongScreen(route.id, navController)
         }
     }
 }

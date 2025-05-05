@@ -1,0 +1,56 @@
+package com.codewithfk.musify_android.ui.feature.playsong
+
+import android.content.Context
+import android.content.Intent
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.codewithfk.musify_android.data.model.Song
+import com.codewithfk.musify_android.data.network.Resource
+import com.codewithfk.musify_android.data.repository.MusicRepository
+import com.codewithfk.musify_android.data.service.MusifyPlaybackService
+import com.codewithfk.musify_android.data.service.MusifyPlaybackService.Companion.KEY_SONG
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
+import org.koin.android.annotation.KoinViewModel
+
+@KoinViewModel
+class PlaySongViewModel(private val repo: MusicRepository, private val context: Context) :
+    ViewModel() {
+
+    private val _state = MutableStateFlow<PlaySongState>(PlaySongState.Loading)
+    val state: StateFlow<PlaySongState> = _state
+
+    private val _event = MutableSharedFlow<PlaySongEvent>()
+    val event = _event.asSharedFlow()
+
+    fun fetchData(songID: String) {
+        viewModelScope.launch {
+            try {
+                val response = repo.getSongById(songID) // Replace with actual song ID
+                if (response is Resource.Success) {
+                    playSong(response.data)
+                } else {
+                    _state.value = PlaySongState.Error("Failed to fetch song data")
+                }
+            } catch (e: Exception) {
+                _state.value = PlaySongState.Error("Network error: ${e.message}")
+            }
+        }
+    }
+
+    private fun playSong(song: Song) {
+        val intent = Intent(context, MusifyPlaybackService::class.java).apply {
+            action = MusifyPlaybackService.ACTION_PLAY
+            putExtra(KEY_SONG, song)
+        }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            context.startForegroundService(intent)
+        } else {
+            context.startService(intent)
+        }
+    }
+
+}

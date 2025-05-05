@@ -48,4 +48,10 @@ class HomeViewModel(private val homeRepository: HomeRepository, private  val mus
     fun onRetryClicked() {
         fetchData()
     }
+
+    fun onSongClicked(value: String) {
+        viewModelScope.launch {
+            _event.emit(HomeEvent.onSongClick(value))
+        }
+    }
 }
