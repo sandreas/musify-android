@@ -63,7 +63,9 @@ class MusifyPlaybackService : Service() {
                     _player.value = playerState.value.copy(
                         isBuffering = true,
                         currentPosition = exoPlayer.currentPosition,
-                        duration = exoPlayer.duration
+                        duration = exoPlayer.duration,
+                        error = null,
+                        isPlaying = false
                     )
                     updatePlaybackState(PlaybackStateCompat.STATE_BUFFERING)
                     updateMediaSessionState()
@@ -74,7 +76,8 @@ class MusifyPlaybackService : Service() {
                         isPlaying = exoPlayer.isPlaying,
                         currentPosition = exoPlayer.currentPosition,
                         duration = exoPlayer.duration,
-                        error = null
+                        error = null,
+                        isBuffering = false
                     )
 
                     if (exoPlayer.isPlaying) {
@@ -90,7 +93,9 @@ class MusifyPlaybackService : Service() {
                     _player.value = playerState.value.copy(
                         isPlaying = false,
                         currentPosition = 0L,
-                        duration = 0L
+                        duration = 0L,
+                        error = null,
+                        isBuffering = false
                     )
                     updatePlaybackState(PlaybackStateCompat.STATE_STOPPED)
                     updateMediaSessionState()
@@ -100,7 +105,9 @@ class MusifyPlaybackService : Service() {
                     _player.value = playerState.value.copy(
                         isPlaying = false,
                         currentPosition = 0L,
-                        duration = 0L
+                        duration = 0L,
+                        error = null,
+                        isBuffering = false
                     )
                     updatePlaybackState(PlaybackStateCompat.STATE_NONE)
                     updateMediaSessionState()
@@ -157,7 +164,10 @@ class MusifyPlaybackService : Service() {
             exoPlayer.seekTo(pos)
             _player.value = playerState.value.copy(
                 currentPosition = pos,
-                duration = exoPlayer.duration
+                duration = exoPlayer.duration,
+                isBuffering = exoPlayer.isLoading,
+                isPlaying = exoPlayer.isPlaying,
+                error = null
             )
         }
 
@@ -195,6 +205,7 @@ class MusifyPlaybackService : Service() {
                         duration = exoPlayer.duration,
                         isBuffering = exoPlayer.isLoading,
                         isPlaying = exoPlayer.isPlaying,
+                        error = null
                     )
                 }
                 kotlinx.coroutines.delay(500)
@@ -357,6 +368,9 @@ class MusifyPlaybackService : Service() {
             ex.printStackTrace()
         }
         updateNotification()
+    }
+    fun isPlaying(): Boolean {
+        return exoPlayer.isPlaying
     }
 
     fun resumeSong() {
