@@ -63,7 +63,9 @@ class MusifyPlaybackService : Service() {
                     _player.value = playerState.value.copy(
                         isBuffering = true,
                         currentPosition = exoPlayer.currentPosition,
-                        duration = exoPlayer.duration
+                        duration = exoPlayer.duration,
+                        isPlaying = false,
+                        error = null
                     )
                     updatePlaybackState(PlaybackStateCompat.STATE_BUFFERING)
                     updateMediaSessionState()
@@ -74,7 +76,8 @@ class MusifyPlaybackService : Service() {
                         isPlaying = exoPlayer.isPlaying,
                         currentPosition = exoPlayer.currentPosition,
                         duration = exoPlayer.duration,
-                        error = null
+                        error = null,
+                        isBuffering = false
                     )
 
                     if (exoPlayer.isPlaying) {
@@ -90,7 +93,9 @@ class MusifyPlaybackService : Service() {
                     _player.value = playerState.value.copy(
                         isPlaying = false,
                         currentPosition = 0L,
-                        duration = 0L
+                        duration = 0L,
+                        isBuffering = false,
+                        error = null
                     )
                     updatePlaybackState(PlaybackStateCompat.STATE_STOPPED)
                     updateMediaSessionState()
@@ -100,7 +105,9 @@ class MusifyPlaybackService : Service() {
                     _player.value = playerState.value.copy(
                         isPlaying = false,
                         currentPosition = 0L,
-                        duration = 0L
+                        duration = 0L,
+                        isBuffering = false,
+                        error = null
                     )
                     updatePlaybackState(PlaybackStateCompat.STATE_NONE)
                     updateMediaSessionState()
@@ -264,51 +271,32 @@ class MusifyPlaybackService : Service() {
 
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-
         if (intent != null) {
             MediaButtonReceiver.handleIntent(mediaSession, intent)
-        }
-        // Handle the intent actions here
-        when (intent?.action) {
-            ACTION_PLAY -> {
-                val song = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    intent.getParcelableExtra(KEY_SONG, Song::class.java)
-                } else {
-                    intent.getParcelableExtra<Song>(KEY_SONG)
-                }
-
-                if (song != null) {
-                    playSong(song)
-                } else {
-                    if (_player.value.currentSong != null) {
+            
+            when (intent.action) {
+                ACTION_PLAY -> {
+                    val song = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        intent.getParcelableExtra(KEY_SONG, Song::class.java)
+                    } else {
+                        intent.getParcelableExtra(KEY_SONG)
+                    }
+                    if (song != null) {
+                        playSong(song)
+                    } else {
                         resumeSong()
                     }
                 }
-            }
-
-            ACTION_PAUSE -> {
-                pauseSong()
-            }
-
-            ACTION_STOP -> {
-
-            }
-
-            ACTION_PREVIOUS -> {
-
-            }
-
-            ACTION_NEXT -> {
-
+                ACTION_PAUSE -> pauseSong()
+                ACTION_STOP -> stopSong()
             }
         }
         return START_STICKY
     }
 
-    override fun onBind(intent: Intent?): IBinder? {
+    override fun onBind(intent: Intent?): IBinder {
         return binder
     }
-
 
     fun playSong(song: Song) {
         try {
@@ -318,6 +306,7 @@ class MusifyPlaybackService : Service() {
                 currentPosition = 0L,
                 duration = song.duration.toLong()
             )
+            
             val metaBuilder = MediaMetadataCompat.Builder()
                 .putString(MediaMetadataCompat.METADATA_KEY_TITLE, song.title)
                 .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, song.artist.name)
@@ -330,6 +319,8 @@ class MusifyPlaybackService : Service() {
             exoPlayer.setMediaItem(mediaItem)
             exoPlayer.prepare()
             exoPlayer.playWhenReady = true
+            
+            startForegroundServiceIfNeeded()
         } catch (ex: Exception) {
             _player.value = playerState.value.copy(
                 error = ex.message,
@@ -348,15 +339,14 @@ class MusifyPlaybackService : Service() {
                 currentPosition = exoPlayer.currentPosition,
                 duration = exoPlayer.duration
             )
+            updateNotification()
         } catch (ex: Exception) {
             _player.value = playerState.value.copy(
                 error = ex.message,
-                isBuffering = false,
-                currentSong = null
+                isBuffering = false
             )
             ex.printStackTrace()
         }
-        updateNotification()
     }
 
     fun resumeSong() {
@@ -368,15 +358,40 @@ class MusifyPlaybackService : Service() {
                 duration = exoPlayer.duration
             )
             startForegroundServiceIfNeeded()
+            updateNotification()
         } catch (ex: Exception) {
             _player.value = playerState.value.copy(
                 error = ex.message,
-                isBuffering = false,
-                currentSong = null
+                isBuffering = false
             )
             ex.printStackTrace()
         }
-        updateNotification()
+    }
+
+    fun seekTo(position: Long) {
+        try {
+            exoPlayer.seekTo(position)
+            _player.value = playerState.value.copy(
+                currentPosition = position
+            )
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
+    }
+
+    fun stopSong() {
+        try {
+            exoPlayer.stop()
+            _player.value = playerState.value.copy(
+                isPlaying = false,
+                currentPosition = 0,
+                duration = 0,
+                currentSong = null
+            )
+            stopForeground(STOP_FOREGROUND_REMOVE)
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
     }
 }
 
