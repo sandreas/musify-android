@@ -3,8 +3,13 @@ package com.codewithfk.musify_android.ui.feature.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.codewithfk.musify_android.data.MusifySession
+import com.codewithfk.musify_android.data.model.Album
+import com.codewithfk.musify_android.data.model.Artist
+import com.codewithfk.musify_android.data.model.HomeDataResponse
+import com.codewithfk.musify_android.data.model.Song
 import com.codewithfk.musify_android.data.network.Resource
 import com.codewithfk.musify_android.data.repository.HomeRepository
+import com.codewithfk.musify_android.data.repository.MusicRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,7 +18,7 @@ import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
-class HomeViewModel(private val homeRepository: HomeRepository, private  val musifySession: MusifySession) : ViewModel() {
+class HomeViewModel(private val homeRepository: HomeRepository, private  val musifySession: MusifySession, private val musicRepo: MusicRepository) : ViewModel() {
 
     private val _state = MutableStateFlow<HomeState>(HomeState.Loading)
     val state: StateFlow<HomeState> = _state
@@ -22,8 +27,30 @@ class HomeViewModel(private val homeRepository: HomeRepository, private  val mus
     val event = _event.asSharedFlow()
 
     init {
-        fetchData()
+        // fetchData()
+        printSong();
     }
+
+    fun printSong() {
+        viewModelScope.launch {
+
+            val songResource = musicRepo.getSongById("1")
+            var song : Song?
+            when(songResource) {
+                is Resource.Success -> {
+                    song = songResource.data
+                }
+
+                is Resource.Error<*> -> song = null
+            }
+            if(song != null) {
+                val response = HomeDataResponse(mutableListOf(song),mutableListOf(), mutableListOf())
+                _state.value = HomeState.Success(response)
+            }
+
+        }
+    }
+
     fun getUserName(): String {
         return musifySession.getUserName()?: "Guest"
     }
