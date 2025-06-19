@@ -1,5 +1,6 @@
 package com.codewithfk.musify_android.di
 
+import com.codewithfk.musify_android.data.MusifySession
 import com.codewithfk.musify_android.data.network.ApiService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -19,9 +20,20 @@ class NetworkModule {
     }
 
     @Single
-    fun provideOkHttpClient(loggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
+    fun provideOkHttpClient(
+        loggingInterceptor: HttpLoggingInterceptor,
+        musifySession: MusifySession
+    ): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
+            .addInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .addHeader("Content-Type", "application/json")
+                if (musifySession.getToken() != null) {
+                    request.addHeader("Authorization", "Bearer ${musifySession.getToken()}")
+                }
+                chain.proceed(request.build())
+            }
             .build()
     }
 
