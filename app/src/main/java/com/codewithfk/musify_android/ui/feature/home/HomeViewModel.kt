@@ -34,7 +34,7 @@ class HomeViewModel(private val homeRepository: HomeRepository, private  val mus
     fun printSong() {
         viewModelScope.launch {
 
-            val songResource = musicRepo.getSongById("1")
+            val songResource = musicRepo.getSongById("B00UWZKNYQ")
             var song : Song?
             when(songResource) {
                 is Resource.Success -> {

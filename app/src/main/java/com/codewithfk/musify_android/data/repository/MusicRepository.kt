@@ -13,14 +13,14 @@ class MusicRepository(/*private val apiService: ApiService*/) {
     )
     val songs = mutableListOf(
         Song(artist=artists[0],
-            audioUrl="https://download.samplelib.com/mp3/sample-15s.mp3",
+            audioUrl="https://samples.audible.de/bk/adko/002062/bk_adko_002062_sample.mp3",
             coverImage="https://m.media-amazon.com/images/I/61Am6kq5sqL._SL500_.jpg",
             createdAt=0L,
-            duration=15000,
-            genre="A Genre",
-            id="1",
+            duration=10*60*1000,
+            genre="Fantasy",
+            id="B00UWZKNYQ",
             releaseDate=0L,
-            title="A Title",
+            title="Zeiten des Sturms",
             updatedAt=0L )
     )
     suspend fun getSongById(id: String): Resource<Song> {

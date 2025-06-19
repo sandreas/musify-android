@@ -5,10 +5,13 @@ import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
+import android.view.KeyEvent
 import androidx.core.net.toUri
 import androidx.media.session.MediaButtonReceiver
 import androidx.media3.common.MediaItem
@@ -25,6 +28,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
+import java.util.Timer
+import kotlin.concurrent.timerTask
 
 class MusifyPlaybackService : Service() {
 
@@ -170,6 +175,317 @@ class MusifyPlaybackService : Service() {
                 error = null
             )
         }
+
+        /* CUSTOM sandreas! */
+        fun onSeek(offset: Long) {
+            val currentPos = exoPlayer.currentPosition
+            var newPosition = currentPos + offset
+            if (newPosition < 0) {
+                newPosition = 0;
+            } else if (newPosition > exoPlayer.duration) {
+                newPosition = exoPlayer.duration - 1;
+            }
+            super.onSeekTo(newPosition)
+            exoPlayer.seekTo(newPosition)
+            _player.value = playerState.value.copy(
+                currentPosition = newPosition,
+                duration = exoPlayer.duration
+            )
+        }
+
+
+        val tag = "MediaSessionCompat.Callback()"
+        val seekPlayBufferTime = 450L
+
+        var clickPressed = false
+        var clickCount = 0
+        var clickTimer = Timer()
+        var clickTimerScheduled = false
+        var clickTimerId = System.currentTimeMillis()
+        var lastStatePlaying = false
+        var stopSeeking = false
+
+        override fun onMediaButtonEvent(intent: Intent): Boolean {
+            if (Intent.ACTION_MEDIA_BUTTON != intent.action) {
+                return false;
+            }
+            val keyEvent = if (Build.VERSION.SDK_INT >= 33) {
+                intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT, KeyEvent::class.java)
+            } else {
+                @Suppress("DEPRECATION")
+                intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT)
+            }
+            if(keyEvent == null) {
+                return false
+            }
+
+            // Log.d(tag, "=== debounceKeyEvent: ${keyEventToString(keyEvent)}")
+            return debounceKeyEvent(keyEvent)
+        }
+
+        private fun keyEventToString(keyEvent: KeyEvent): String {
+            var action = ""
+            when (keyEvent.action) {
+                KeyEvent.ACTION_UP -> {
+                    action = "ACTION_UP"
+                }
+                KeyEvent.ACTION_DOWN  -> {
+                    action = "ACTION_DOWN"
+                }
+            }
+
+            var keyCode = ""
+            when (keyEvent.keyCode) {
+                KeyEvent.KEYCODE_HEADSETHOOK -> {
+                    keyCode = "KEYCODE_HEADSETHOOK"
+                }
+                KeyEvent.KEYCODE_MEDIA_PLAY -> {
+                    keyCode = "KEYCODE_MEDIA_PLAY"
+                }
+                KeyEvent.KEYCODE_MEDIA_PAUSE -> {
+                    keyCode = "KEYCODE_MEDIA_PAUSE"
+                }
+                KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE  -> {
+                    keyCode = "KEYCODE_MEDIA_PLAY_PAUSE"
+                }
+
+                KeyEvent.KEYCODE_MEDIA_NEXT -> {
+                    keyCode = "KEYCODE_MEDIA_NEXT"
+                }
+
+                KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {
+                    keyCode = "KEYCODE_MEDIA_PREVIOUS"
+                }
+
+                KeyEvent.KEYCODE_MEDIA_STOP -> {
+                    keyCode = "KEYCODE_MEDIA_STOP"
+                }
+            }
+
+            return "keyCode=$keyCode, action=$action, repeatCount=${keyEvent.repeatCount}"
+        }
+
+        private fun debounceKeyEvent(keyEvent: KeyEvent): Boolean {
+            Log.d(
+                tag,
+                "=== debounceKeyEvent: ${keyEventToString(keyEvent)}, clickCount=$clickCount, repeatCount=${keyEvent.repeatCount} longPress=${keyEvent.isLongPress}"
+            )
+
+
+            // ignore repeated events
+
+
+
+            // how does this work:
+            // - every keyDown and keyUp triggers a scheduled handler
+            // - another keyDown or keyUp cancels the scheduled handler and re-triggers it with new values
+            // - the handler takes clickCount:int and clickPressed:bool (if held down)
+            // - keyCodes increase the number of clicks (PlayPause+=1, Next+=2, Prev+=3)
+            // - depending on the number of clicks, the playerNotificationService handles the configured action
+            // problems:
+            // - the logs show pretty accurate click / hold detection, but it does not really translate well in the player
+            // - since the trigger is scheduled, it does run in a different thread
+            // - this leads to strange behaviour - probably easy to fix, but I'm no kotlin native (Coroutines)
+            // - probably after some actions the thread of the player is no longer accessible...
+            if (keyEvent.action == KeyEvent.ACTION_UP) {
+                clickPressed = false
+                // Log.d(tag, "=== KeyEvent.ACTION_UP")
+
+            } else if (keyEvent.action == KeyEvent.ACTION_DOWN) {
+                // Log.d(tag, "=== KeyEvent.ACTION_DOWN")
+
+                if (clickPressed) {
+                    return true
+                }
+                clickPressed = true
+
+                when (keyEvent.keyCode) {
+                    KeyEvent.KEYCODE_HEADSETHOOK,
+                    KeyEvent.KEYCODE_MEDIA_PLAY,
+                    KeyEvent.KEYCODE_MEDIA_PAUSE,
+                    KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> {
+                        clickCount++
+                        Log.d(
+                            tag,
+                            "=== handleCallMediaButton: Headset Hook/Play/ Pause, clickCount=$clickCount"
+                        )
+                    }
+
+                    KeyEvent.KEYCODE_MEDIA_NEXT -> {
+                        clickCount += 2
+                        Log.d(tag, "=== handleCallMediaButton: Media Next, clickCount=$clickCount")
+                    }
+
+                    KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {
+                        clickCount += 3
+                        Log.d(
+                            tag,
+                            "=== handleCallMediaButton: Media Previous, clickCount=$clickCount"
+                        )
+                    }
+
+                    KeyEvent.KEYCODE_MEDIA_STOP -> {
+                        Log.d(tag, "=== handleCallMediaButton: Media Stop, clickCount=$clickCount")
+                        onStop()
+                        clickTimer.cancel()
+                        return true
+                    }
+
+                    else -> {
+                        Log.d(tag, "=== KeyCode:${keyEvent.keyCode}, clickCount=$clickCount")
+                        return false
+                    }
+                }
+            }
+
+            if (clickTimerScheduled) {
+                Log.d(
+                    tag,
+                    "=== clickTimer cancelled: clicks=$clickCount, hold=$clickPressed,  id=$clickTimerId ==== ${keyEventToString(keyEvent)} ===="
+                )
+                clickTimer.cancel()
+                clickTimer.purge() // not required?
+                clickTimer = Timer()
+            }
+
+            //if(keyEvent.repeatCount == 0) {
+            // this executes although it should be cancelled!
+            // race condition?
+            // replace with: https://stackoverflow.com/questions/50858684/kotlin-android-debounce
+            /*
+                        serviceScope.launch {
+
+                        }
+
+
+                        searchJob?.cancel()
+                        searchJob = viewModelScope.launch {
+                            delay(500)
+                            search(text)
+                        }
+
+                         */
+
+            clickTimer.schedule(timerTask {
+                    Log.d(
+                        tag,
+                        "=== clickTimer executed: clicks=$clickCount, hold=$clickPressed, id=$clickTimerId ==== ${keyEventToString(keyEvent)} ===="
+                    )
+                    handleClicks(clickCount, clickPressed)
+
+                    clickCount = 0
+                    clickTimerScheduled = false
+                }, 650)
+
+            clickTimerScheduled = true
+            Log.d(
+                tag,
+                "== clickTimer scheduled ($clickTimerId): clicks=$clickCount, hold=$clickPressed ==== ${keyEventToString(keyEvent)} ===="
+            )
+            // }
+
+
+            return true
+        }
+
+        fun handleClicks(clicks: Int, clickPressed: Boolean) {
+            Log.d(tag, "=== handleClicks: count=$clicks,hold=$clickPressed")
+            return
+            stopSeeking = true
+            serviceScope.launch {
+                // the handlers should be configurlateinitable, defaults:
+                // hold -> jumpBackward
+                // click -> play / pause
+                // click, hold -> fast forward
+                // click, click -> next (chapter or track)
+                // click, click, hold -> rewind
+                // click, click, click -> previous (chapter or track)
+
+                Log.d(tag, "=== handleClicks: count=$clicks,hold=$clickPressed")
+
+                if (clickPressed) {
+                    lastStatePlaying = exoPlayer.isPlaying
+                    when (clicks) {
+                        1 -> {
+                            // jumpBackward()
+                            onSeek(-30000)
+                        }
+
+                        2 -> {
+
+                            Log.d(tag, "=== fastForward init, stopSeeking=$stopSeeking")
+                            stopSeeking = false
+                            val mainHandler = Handler(mainLooper)
+                            mainHandler.post(object : Runnable {
+                                override fun run() {
+                                    onSeek(10000 - seekPlayBufferTime)
+                                    onPlay()
+                                    if(!stopSeeking) {
+                                        mainHandler.postDelayed(this, seekPlayBufferTime)
+                                    }
+                                }
+                            })
+                        }
+
+                        3 -> {
+                            Log.d(tag, "=== rewind init, stopSeeking=$stopSeeking")
+                            stopSeeking = false
+                            val mainHandler = Handler(mainLooper)
+                            mainHandler.post(object : Runnable {
+                                override fun run() {
+                                    onSeek(-(10000 + seekPlayBufferTime))
+                                    onPlay()
+                                    if(!stopSeeking) {
+                                        mainHandler.postDelayed(this, seekPlayBufferTime)
+                                    }
+                                }
+                            })
+                        }
+                    }
+                } else {
+                    when (clicks) {
+                        0 -> {
+                            // switch from fastForward / rewind back to last playing state
+                            if (lastStatePlaying) {
+                                onPlay()
+                            } else {
+                                onPause()
+                            }
+                        }
+
+                        1 -> {
+                            if (exoPlayer.isPlaying) {
+                                onPause()
+                            } else {
+                                onPlay()
+                            }
+                        }
+
+                        2 -> {
+                            // todo: implement "next chapter"
+                            // workaround: just seek +5mins
+                            // skipToNext()
+                            // seekForward(300000)
+                            onSeek(300000)
+                        }
+
+                        3 -> {
+                            // todo: implement "previous chapter"
+                            // workaround: just seek -5mins
+                            // skipToPrevious()
+                            // seekBackward(300000)
+                            onSeek(-300000)
+                        }
+                    }
+                }
+            }
+
+
+
+        }
+
+        /* END CUSTOM sandreas */
+
 
     }
 
