@@ -27,7 +27,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
     private var isSplashScreenVisible = true
-    val viewModel: MainViewModel by viewModel()
+    val mainViewModel: MainViewModel by viewModel()
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen().apply {
             setKeepOnScreenCondition { isSplashScreenVisible }
@@ -58,7 +58,7 @@ class MainActivity : ComponentActivity() {
                     Box(modifier = Modifier.padding(innerPadding)) {
                         AppNavGraph(
                             navController = rememberNavController(),
-                            startDestination = if(viewModel.isUserLoggedIn()) HomeRoute else OnboardingRoute
+                            startDestination = if(mainViewModel.isUserLoggedIn()) HomeRoute else OnboardingRoute
                         )
                     }
                 }

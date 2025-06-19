@@ -1,28 +1,34 @@
 [versions]
-agp = "8.9.1"
-coilCompose = "3.1.0"
+agp = "8.9.3"
+coilCompose = "3.2.0"
 converterGson = "2.11.0"
 coreSplashscreen = "1.0.1"
-koinAndroid = "4.0.3"
-koinAnnotations = "2.0.0-Beta1"
-koinKspCompiler = "2.0.0-Beta1"
-kotlin = "2.0.21"
-coreKtx = "1.15.0"
+koinAndroid = "4.0.4"
+koinAnnotations = "2.0.0"
+koinKspCompiler = "2.0.0"
+kotlin = "2.1.21"
+coreKtx = "1.16.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 kotlinxSerializationJson = "1.8.0"
-lifecycleRuntimeKtx = "2.8.7"
+lifecycleRuntimeKtx = "2.9.1"
 activityCompose = "1.10.1"
-composeBom = "2024.09.00"
-ksp="2.0.20-1.0.25"
+composeBom = "2025.06.01"
+ksp="2.1.21-2.0.2"
 loggingInterceptor = "4.12.0"
-navigationCompose = "2.8.9"
+media = "1.7.0"
+media3Ui = "1.7.1"
+navigationCompose = "2.9.0"
 retrofit = "2.11.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
+androidx-media = { module = "androidx.media:media", version.ref = "media" }
+androidx-media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "media3Ui" }
+androidx-media3-session = { module = "androidx.media3:media3-session", version.ref = "media3Ui" }
+androidx-media3-ui = { module = "androidx.media3:media3-ui", version.ref = "media3Ui" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coilCompose" }

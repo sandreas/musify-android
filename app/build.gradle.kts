@@ -75,9 +75,9 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
 
-    implementation ("androidx.media3:media3-exoplayer:1.6.1")
-    implementation ("androidx.media3:media3-session:1.6.1")
-    implementation ("androidx.media3:media3-ui:1.6.1")
-    implementation ("androidx.media:media:1.7.0")
+    implementation (libs.androidx.media3.exoplayer)
+    implementation (libs.androidx.media3.session)
+    implementation (libs.androidx.media3.ui)
+    implementation (libs.androidx.media)
 
 }
