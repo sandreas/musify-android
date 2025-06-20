@@ -8,13 +8,13 @@ On some devices the headset button has a delay of `1000ms` when the button is he
 The pattern `ACTION_DOWN / ACTION_UP / ACTION_DOWN+hold` produces the following event log on an Android 13 device (Pixel 4a, GrapheneOS):
 
 ```
-2025-06-20 09:06:21.635 12076-12076 === keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=0
-2025-06-20 09:06:21.637 12076-12076 === keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0
+2025-06-20 07:06:21.635 12076-12076 === keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=0
+2025-06-20 07:06:21.637 12076-12076 === keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0
 # > 1 second event delay on hold key????
-2025-06-20 09:06:22.642 12076-12076 === keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=2
-2025-06-20 09:06:22.698 12076-12076 === keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=3
-2025-06-20 09:06:22.748 12076-12076 === keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=4
-2025-06-20 09:06:22.800 12076-12076 === keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=5
+2025-06-20 07:06:22.642 12076-12076 === keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=2
+2025-06-20 07:06:22.698 12076-12076 === keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=3
+2025-06-20 07:06:22.748 12076-12076 === keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=4
+2025-06-20 07:06:22.800 12076-12076 === keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=5
 ```
 
 This shows that holding the headset button down produces a delay of `1000ms` followed by a `ACTION_DOWN` with a `repeatCount=2` skipping the `repeatCount=1` event
