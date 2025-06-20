@@ -1,140 +1,82 @@
 # Musify Android App
 
-full log analyzed
-```
-Down 1
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=0, clickCount=0, repeatCount=0 longPress=false
-=== handleCallMediaButton: Headset Hook/Play/ Pause, clickCount=1
-== clickTimer scheduled (1750367916680): clicks=1, hold=true ==== keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=0 ====
+## Todo / Issues
 
-Up 1
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0, clickCount=1, repeatCount=0 longPress=false
-=== clickTimer cancelled: clicks=1, hold=false,  id=1750367916680 ==== keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0 ====
-== clickTimer scheduled (1750367916680): clicks=1, hold=false ==== keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0 ====
+### Introduction
+On some devices the headset button has a delay of `1000ms` when the button is held / pressed down for longer.
 
-Down 2
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=0, clickCount=1, repeatCount=0 longPress=false
-=== handleCallMediaButton: Headset Hook/Play/ Pause, clickCount=2
-=== clickTimer cancelled: clicks=2, hold=true,  id=1750367916680 ==== keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=0 ====
-== clickTimer scheduled (1750367916680): clicks=2, hold=true ==== keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=0 ====
-
-Up 2
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0, clickCount=2, repeatCount=0 longPress=false
-=== clickTimer cancelled: clicks=2, hold=false,  id=1750367916680 ==== keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0 ====
-== clickTimer scheduled (1750367916680): clicks=2, hold=false ==== keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0 ====
-!!! === clickTimer executed: clicks=2, hold=false, id=1750367916680 ==== keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0 ====
-!!! === handleClicks: count=2,hold=false
-
-details:
-    2025-06-19 23:18:52.365 28111-28111 === debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0, clickCount=2, repeatCount=0 longPress=false
-    2025-06-19 23:18:52.365 28111-28111 === clickTimer cancelled: clicks=2, hold=false,  id=1750367916680 ==== keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0 ====
-    2025-06-19 23:18:52.366 28111-28111 == clickTimer scheduled (1750367916680): clicks=2, hold=false ==== keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0 ====
-    2025-06-19 23:18:53.017 28111-28206 === clickTimer executed: clicks=2, hold=false, id=1750367916680 ==== keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0 ====
-    2025-06-19 23:18:53.017 28111-28206 === handleClicks: count=2,hold=false
-
-
-
-Down and hold 3
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=2, clickCount=0, repeatCount=2 longPress=false
-=== handleCallMediaButton: Headset Hook/Play/ Pause, clickCount=1
-== clickTimer scheduled (1750367916680): clicks=1, hold=true ==== keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=2 ====
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=3, clickCount=1, repeatCount=3 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=4, clickCount=1, repeatCount=4 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=5, clickCount=1, repeatCount=5 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=6, clickCount=1, repeatCount=6 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=7, clickCount=1, repeatCount=7 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=8, clickCount=1, repeatCount=8 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=9, clickCount=1, repeatCount=9 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=10, clickCount=1, repeatCount=10 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=11, clickCount=1, repeatCount=11 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=12, clickCount=1, repeatCount=12 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=13, clickCount=1, repeatCount=13 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=14, clickCount=1, repeatCount=14 longPress=false
-=== clickTimer executed: clicks=1, hold=true, id=1750367916680 ==== keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=2 ====
-=== handleClicks: count=1,hold=true
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=15, clickCount=0, repeatCount=15 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=16, clickCount=0, repeatCount=16 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=17, clickCount=0, repeatCount=17 longPress=false
-
-Up 3
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0, clickCount=0, repeatCount=0 longPress=false
-== clickTimer scheduled (1750367916680): clicks=0, hold=false ==== keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0 ====
-=== clickTimer executed: clicks=0, hold=false, id=1750367916680 ==== keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0 ====
-=== handleClicks: count=0,hold=false
+The pattern `ACTION_DOWN / ACTION_UP / ACTION_DOWN+hold` produces the following event log on an Android 13 device (Pixel 4a, GrapheneOS):
 
 ```
-
-full log
-```
-2025-06-19 23:18:52.106 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  === debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=0, clickCount=0, repeatCount=0 longPress=false
-2025-06-19 23:18:52.106 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  === handleCallMediaButton: Headset Hook/Play/ Pause, clickCount=1
-2025-06-19 23:18:52.106 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  == clickTimer scheduled (1750367916680): clicks=1, hold=true ==== keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=0 ====
-2025-06-19 23:18:52.107 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  === debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0, clickCount=1, repeatCount=0 longPress=false
-2025-06-19 23:18:52.107 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  === clickTimer cancelled: clicks=1, hold=false,  id=1750367916680 ==== keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0 ====
-2025-06-19 23:18:52.108 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  == clickTimer scheduled (1750367916680): clicks=1, hold=false ==== keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0 ====
-2025-06-19 23:18:52.364 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  === debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=0, clickCount=1, repeatCount=0 longPress=false
-2025-06-19 23:18:52.364 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  === handleCallMediaButton: Headset Hook/Play/ Pause, clickCount=2
-2025-06-19 23:18:52.364 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  === clickTimer cancelled: clicks=2, hold=true,  id=1750367916680 ==== keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=0 ====
-2025-06-19 23:18:52.365 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  == clickTimer scheduled (1750367916680): clicks=2, hold=true ==== keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=0 ====
-2025-06-19 23:18:52.365 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  === debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0, clickCount=2, repeatCount=0 longPress=false
-2025-06-19 23:18:52.365 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  === clickTimer cancelled: clicks=2, hold=false,  id=1750367916680 ==== keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0 ====
-2025-06-19 23:18:52.366 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  == clickTimer scheduled (1750367916680): clicks=2, hold=false ==== keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0 ====
-2025-06-19 23:18:53.017 28111-28206 MediaSessi...Callback() com.codewithfk.musify_android        D  === clickTimer executed: clicks=2, hold=false, id=1750367916680 ==== keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0 ====
-2025-06-19 23:18:53.017 28111-28206 MediaSessi...Callback() com.codewithfk.musify_android        D  === handleClicks: count=2,hold=false
-2025-06-19 23:18:53.405 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  === debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=2, clickCount=0, repeatCount=2 longPress=false
-2025-06-19 23:18:53.405 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  === handleCallMediaButton: Headset Hook/Play/ Pause, clickCount=1
-2025-06-19 23:18:53.405 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  == clickTimer scheduled (1750367916680): clicks=1, hold=true ==== keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=2 ====
-2025-06-19 23:18:53.456 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  === debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=3, clickCount=1, repeatCount=3 longPress=false
-2025-06-19 23:18:53.507 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  === debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=4, clickCount=1, repeatCount=4 longPress=false
-2025-06-19 23:18:53.560 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  === debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=5, clickCount=1, repeatCount=5 longPress=false
-2025-06-19 23:18:53.608 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  === debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=6, clickCount=1, repeatCount=6 longPress=false
-2025-06-19 23:18:53.663 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  === debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=7, clickCount=1, repeatCount=7 longPress=false
-2025-06-19 23:18:53.710 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  === debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=8, clickCount=1, repeatCount=8 longPress=false
-2025-06-19 23:18:53.763 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  === debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=9, clickCount=1, repeatCount=9 longPress=false
-2025-06-19 23:18:53.817 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  === debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=10, clickCount=1, repeatCount=10 longPress=false
-2025-06-19 23:18:53.868 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  === debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=11, clickCount=1, repeatCount=11 longPress=false
-2025-06-19 23:18:53.918 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  === debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=12, clickCount=1, repeatCount=12 longPress=false
-2025-06-19 23:18:53.970 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  === debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=13, clickCount=1, repeatCount=13 longPress=false
-2025-06-19 23:18:54.017 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  === debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=14, clickCount=1, repeatCount=14 longPress=false
-2025-06-19 23:18:54.056 28111-28206 MediaSessi...Callback() com.codewithfk.musify_android        D  === clickTimer executed: clicks=1, hold=true, id=1750367916680 ==== keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=2 ====
-2025-06-19 23:18:54.056 28111-28206 MediaSessi...Callback() com.codewithfk.musify_android        D  === handleClicks: count=1,hold=true
-2025-06-19 23:18:54.071 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  === debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=15, clickCount=0, repeatCount=15 longPress=false
-2025-06-19 23:18:54.122 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  === debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=16, clickCount=0, repeatCount=16 longPress=false
-2025-06-19 23:18:54.174 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  === debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=17, clickCount=0, repeatCount=17 longPress=false
-2025-06-19 23:18:54.192 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  === debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0, clickCount=0, repeatCount=0 longPress=false
-2025-06-19 23:18:54.192 28111-28111 MediaSessi...Callback() com.codewithfk.musify_android        D  == clickTimer scheduled (1750367916680): clicks=0, hold=false ==== keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0 ====
-2025-06-19 23:18:54.844 28111-28206 MediaSessi...Callback() com.codewithfk.musify_android        D  === clickTimer executed: clicks=0, hold=false, id=1750367916680 ==== keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0 ====
-2025-06-19 23:18:54.844 28111-28206 MediaSessi...Callback() com.codewithfk.musify_android        D  === handleClicks: count=0,hold=false
-
+2025-06-20 09:06:21.635 12076-12076 === keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=0
+2025-06-20 09:06:21.637 12076-12076 === keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0
+# > 1 second event delay on hold key????
+2025-06-20 09:06:22.642 12076-12076 === keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=2
+2025-06-20 09:06:22.698 12076-12076 === keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=3
+2025-06-20 09:06:22.748 12076-12076 === keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=4
+2025-06-20 09:06:22.800 12076-12076 === keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=5
 ```
 
+This shows that holding the headset button down produces a delay of `1000ms` followed by a `ACTION_DOWN` with a `repeatCount=2` skipping the `repeatCount=1` event
 
+### The problem
+The problem with this is, that I developed a pattern-recognition algorithm to react to these specific tap codes:
+
+- `TAP` - play/pause
+- `TAP-TAP` - next (chapter or track)
+- `TAP-TAP-TAP` - prev (chapter or track)
+- `TAP+hold` - go back 30 seconds
+- `TAP-TAP+hold` - fast-forward
+- `TAP-TAP-TAP+hold` - rewind
+
+The algorithm is based on accurate timing, where the desired action is executed after `650ms` of receiving no further events,
+which is (in my opinion) the perfect timing to execute fast with enough flexibility. However, this
+is no longer possible with a delay of `1000ms`, because the delayed action is getting executed too early.
+The `TAP+hold` patterns are getting messed up due to this.
+
+### Possible solutions
+- Merge events (e.g. detect double tap, perform action "next", then detect long press and undo "next" and perform rewind)
+- Workaround the 1000ms delay and get every event in onMediaButton
+- A totally custom `MediaButtonReceiver` handling everything on my own (is that possible)?
+
+
+## Custom media button receiver
+```xml
+<receiver android:name=".MediaButtonReceiver"
+    android:enabled="true"
+    android:exported="true">
+    <intent-filter android:priority="999">
+        <action android:name="android.intent.action.MEDIA_BUTTON" />
+    </intent-filter>
+</receiver>
 ```
-# event phase of a 2 click, long press handling
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=0, clickCount=0, repeatCount=0 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0, clickCount=1, repeatCount=0 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=0, clickCount=1, repeatCount=0 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0, clickCount=2, repeatCount=0 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=2, clickCount=0, repeatCount=2 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=3, clickCount=1, repeatCount=3 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=4, clickCount=1, repeatCount=4 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=5, clickCount=1, repeatCount=5 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=6, clickCount=1, repeatCount=6 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=7, clickCount=1, repeatCount=7 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=8, clickCount=1, repeatCount=8 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=9, clickCount=1, repeatCount=9 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=10, clickCount=1, repeatCount=10 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=11, clickCount=1, repeatCount=11 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=12, clickCount=1, repeatCount=12 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=13, clickCount=1, repeatCount=13 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=14, clickCount=1, repeatCount=14 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=15, clickCount=0, repeatCount=15 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=16, clickCount=0, repeatCount=16 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_DOWN, repeatCount=17, clickCount=0, repeatCount=17 longPress=false
-=== debounceKeyEvent: keyCode=KEYCODE_HEADSETHOOK, action=ACTION_UP, repeatCount=0, clickCount=0, repeatCount=0 longPress=false
 
+```kotlin
+class MediaButtonReceiver : BroadcastReceiver() {
+    override fun onReceive(context: Context?, intent: Intent) {
+        if (intent.action == Intent.ACTION_MEDIA_BUTTON) {
+            val event = intent.getParcelableExtra<KeyEvent>(Intent.EXTRA_KEY_EVENT)
+            event?.let {
+                when (it.action) {
+                    KeyEvent.ACTION_DOWN -> {
+                        // Handle the key press here immediately
+                        // For example, trigger the media action
+                        handleMediaButton(it.keyCode)
+                    }
+                }
+                // Prevent further processing by the system
+                abortBroadcast()
+            }
+        }
+    }
+
+    private fun handleMediaButton(keyCode: Int) {
+        // Your logic here, like playing/pausing, next track, etc.
+    }
+}
 ```
 
+## Description
 
 Musify Android App is a sample Android application built to demonstrate modern Android development practices. It leverages the MVVM architectural pattern with a repository pattern, Jetpack Compose for building the UI, and Compose Navigation for handling app navigation. The project is organized in a modular way to ensure scalability and ease of maintenance.
 

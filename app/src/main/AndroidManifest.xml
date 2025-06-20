@@ -19,10 +19,18 @@
         android:theme="@style/Theme.StartScreen"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+        <!-- prio max int value: 2147483647, max uint32 value: 4294967295
+        <receiver android:name=".CustomMediaButtonReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter android:priority="2147483647">
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
+        -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.StartScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -8,6 +8,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.support.v4.media.MediaMetadataCompat
+import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
@@ -28,8 +29,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
-import java.util.Timer
-import kotlin.concurrent.timerTask
+import kotlin.time.Duration.Companion.milliseconds
 
 class MusifyPlaybackService : Service() {
 
@@ -195,15 +195,85 @@ class MusifyPlaybackService : Service() {
 
 
         val tag = "MediaSessionCompat.Callback()"
-        val seekPlayBufferTime = 450L
+        val seekPlayBufferTime = 850L
+
+        // on long press events get "collected" for 1000ms, so holding the key down does not
+        // fire any events for at least 1000ms. Therefore, after keyup you have to wait
+        // at least 1050ms to ensure no long press is being performed
+        val shortDelay = 650.milliseconds
+        // 650 for unihertz jelly 2e
+        // 1100 for Pixel 4a
+        val longerDelay = 650.milliseconds
+
 
         var clickPressed = false
         var clickCount = 0
-        var clickTimer = Timer()
-        var clickTimerScheduled = false
-        var clickTimerId = System.currentTimeMillis()
         var lastStatePlaying = false
         var stopSeeking = false
+        var clickJob: Job? = null
+
+
+
+        /*
+        public boolean onMediaButtonEvent(Intent mediaButtonEvent) {
+            if (android.os.Build.VERSION.SDK_INT >= 27) {
+                // Double tap of play/pause as skipping to next is already handled by framework,
+                // so we don't need to repeat again here.
+                // Note: Double tap would be handled twice for OC-DR1 whose SDK version 26 and
+                //       framework handles the double tap.
+                return false;
+            }
+            MediaSessionImpl impl;
+            Handler callbackHandler;
+            synchronized (mLock) {
+                impl = mSessionImpl.get();
+                callbackHandler = mCallbackHandler;
+            }
+            if (impl == null || callbackHandler == null) {
+                return false;
+            }
+            KeyEvent keyEvent = mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+            if (keyEvent == null || keyEvent.getAction() != KeyEvent.ACTION_DOWN) {
+                return false;
+            }
+            RemoteUserInfo remoteUserInfo = impl.getCurrentControllerInfo();
+            int keyCode = keyEvent.getKeyCode();
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                case KeyEvent.KEYCODE_HEADSETHOOK:
+                    if (keyEvent.getRepeatCount() == 0) {
+                        if (mMediaPlayPausePendingOnHandler) {
+                            callbackHandler.removeMessages(
+                                    CallbackHandler.MSG_MEDIA_PLAY_PAUSE_KEY_DOUBLE_TAP_TIMEOUT);
+                            mMediaPlayPausePendingOnHandler = false;
+                            PlaybackStateCompat state = impl.getPlaybackState();
+                            long validActions = state == null ? 0 : state.getActions();
+                            // Consider double tap as the next.
+                            if ((validActions & PlaybackStateCompat.ACTION_SKIP_TO_NEXT) != 0) {
+                                onSkipToNext();
+                            }
+                        } else {
+                            mMediaPlayPausePendingOnHandler = true;
+                            callbackHandler.sendMessageDelayed(callbackHandler.obtainMessage(
+                                    CallbackHandler.MSG_MEDIA_PLAY_PAUSE_KEY_DOUBLE_TAP_TIMEOUT,
+                                    remoteUserInfo),
+                                    ViewConfiguration.getDoubleTapTimeout());
+                        }
+                    } else {
+                        // Consider long-press as a single tap.
+                        handleMediaPlayPauseIfPendingOnHandler(impl, callbackHandler);
+                    }
+                    return true;
+                default:
+                    // If another key is pressed within double tap timeout, consider the pending
+                    // pending play/pause as a single tap to handle media keys in order.
+                    handleMediaPlayPauseIfPendingOnHandler(impl, callbackHandler);
+                    break;
+            }
+            return false;
+        }
+         */
+
 
         override fun onMediaButtonEvent(intent: Intent): Boolean {
             if (Intent.ACTION_MEDIA_BUTTON != intent.action) {
@@ -271,11 +341,6 @@ class MusifyPlaybackService : Service() {
                 "=== debounceKeyEvent: ${keyEventToString(keyEvent)}, clickCount=$clickCount, repeatCount=${keyEvent.repeatCount} longPress=${keyEvent.isLongPress}"
             )
 
-
-            // ignore repeated events
-
-
-
             // how does this work:
             // - every keyDown and keyUp triggers a scheduled handler
             // - another keyDown or keyUp cancels the scheduled handler and re-triggers it with new values
@@ -287,17 +352,16 @@ class MusifyPlaybackService : Service() {
             // - since the trigger is scheduled, it does run in a different thread
             // - this leads to strange behaviour - probably easy to fix, but I'm no kotlin native (Coroutines)
             // - probably after some actions the thread of the player is no longer accessible...
+            var timerDelay = shortDelay
             if (keyEvent.action == KeyEvent.ACTION_UP) {
                 clickPressed = false
-                // Log.d(tag, "=== KeyEvent.ACTION_UP")
-
+                timerDelay = longerDelay
             } else if (keyEvent.action == KeyEvent.ACTION_DOWN) {
-                // Log.d(tag, "=== KeyEvent.ACTION_DOWN")
-
+                // if down has already fired without receiving an UP, it is a repeated event
+                // that can be ignored
                 if (clickPressed) {
                     return true
                 }
-                clickPressed = true
 
                 when (keyEvent.keyCode) {
                     KeyEvent.KEYCODE_HEADSETHOOK,
@@ -327,7 +391,7 @@ class MusifyPlaybackService : Service() {
                     KeyEvent.KEYCODE_MEDIA_STOP -> {
                         Log.d(tag, "=== handleCallMediaButton: Media Stop, clickCount=$clickCount")
                         onStop()
-                        clickTimer.cancel()
+                        clickJob?.cancel()
                         return true
                     }
 
@@ -336,52 +400,41 @@ class MusifyPlaybackService : Service() {
                         return false
                     }
                 }
+
+                clickPressed = true
             }
 
-            if (clickTimerScheduled) {
+            if (clickJob != null) {
                 Log.d(
                     tag,
-                    "=== clickTimer cancelled: clicks=$clickCount, hold=$clickPressed,  id=$clickTimerId ==== ${keyEventToString(keyEvent)} ===="
+                    "=== clickTimer cancelled: clicks=$clickCount, hold=$clickPressed ==== ${keyEventToString(keyEvent)} ===="
                 )
-                clickTimer.cancel()
-                clickTimer.purge() // not required?
-                clickTimer = Timer()
+                clickJob?.cancel()
             }
 
             //if(keyEvent.repeatCount == 0) {
             // this executes although it should be cancelled!
             // race condition?
             // replace with: https://stackoverflow.com/questions/50858684/kotlin-android-debounce
-            /*
-                        serviceScope.launch {
 
-                        }
+            clickJob = serviceScope.launch {
+                // delay(650);
+                Log.d(
+                    tag,
+                    "== clickTimer scheduled: delay=${timerDelay.inWholeMilliseconds}ms, clicks=$clickCount, hold=$clickPressed ==== ${keyEventToString(keyEvent)} ===="
+                )
+                delay(timerDelay)
+                Log.d(
+                    tag,
+                    "=== clickTimer executed: clicks=$clickCount, hold=$clickPressed ==== ${keyEventToString(keyEvent)} ===="
+                )
+                handleClicks(clickCount, clickPressed)
+
+                clickCount = 0
+            }
 
 
-                        searchJob?.cancel()
-                        searchJob = viewModelScope.launch {
-                            delay(500)
-                            search(text)
-                        }
 
-                         */
-
-            clickTimer.schedule(timerTask {
-                    Log.d(
-                        tag,
-                        "=== clickTimer executed: clicks=$clickCount, hold=$clickPressed, id=$clickTimerId ==== ${keyEventToString(keyEvent)} ===="
-                    )
-                    handleClicks(clickCount, clickPressed)
-
-                    clickCount = 0
-                    clickTimerScheduled = false
-                }, 650)
-
-            clickTimerScheduled = true
-            Log.d(
-                tag,
-                "== clickTimer scheduled ($clickTimerId): clicks=$clickCount, hold=$clickPressed ==== ${keyEventToString(keyEvent)} ===="
-            )
             // }
 
 
@@ -390,7 +443,7 @@ class MusifyPlaybackService : Service() {
 
         fun handleClicks(clicks: Int, clickPressed: Boolean) {
             Log.d(tag, "=== handleClicks: count=$clicks,hold=$clickPressed")
-            return
+            // return
             stopSeeking = true
             serviceScope.launch {
                 // the handlers should be configurlateinitable, defaults:
@@ -486,8 +539,9 @@ class MusifyPlaybackService : Service() {
 
         /* END CUSTOM sandreas */
 
-
     }
+
+
 
     override fun onCreate() {
         super.onCreate()
@@ -500,13 +554,15 @@ class MusifyPlaybackService : Service() {
         mediaSession = MediaSessionCompat(this, "MusifyPlaybackService").also {
             it.isActive = true
             it.setCallback(mediaSessionCallBack)
+
             it.setPlaybackState(
                 PlaybackStateCompat.Builder().setState(PlaybackStateCompat.STATE_NONE, 0, 0f)
                     .setActions(
                         PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PAUSE or PlaybackStateCompat.ACTION_STOP or PlaybackStateCompat.ACTION_SEEK_TO or PlaybackStateCompat.ACTION_SKIP_TO_NEXT or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
                     ).build()
             )
-
+            // it.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS or MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS)
+            // it.setMediaButtonReceiver()
         }
         startPositionUpdate()
     }
