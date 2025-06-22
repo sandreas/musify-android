@@ -204,7 +204,7 @@ class MusifyPlaybackService : Service() {
         val shortDelay = 650.milliseconds
         // 650 for unihertz jelly 2e
         // 1100 for Pixel 4a
-        val longerDelay = 650.milliseconds
+        val longerDelay = 1100.milliseconds
 
 
         var clickPressed = false
@@ -413,11 +413,7 @@ class MusifyPlaybackService : Service() {
                 clickJob?.cancel()
             }
 
-            //if(keyEvent.repeatCount == 0) {
-            // this executes although it should be cancelled!
-            // race condition?
-            // replace with: https://stackoverflow.com/questions/50858684/kotlin-android-debounce
-
+            // source: https://stackoverflow.com/questions/50858684/kotlin-android-debounce
             clickJob = serviceScope.launch {
                 // delay(650);
                 Log.d(
@@ -425,10 +421,6 @@ class MusifyPlaybackService : Service() {
                     "== clickTimer scheduled: delay=${timerDelay.inWholeMilliseconds}ms, clicks=$clickCount, hold=$clickPressed ==== ${keyEventToString(keyEvent)} ===="
                 )
                 delay(timerDelay)
-                Log.d(
-                    tag,
-                    "=== clickTimer executed: clicks=$clickCount, hold=$clickPressed ==== ${keyEventToString(keyEvent)} ===="
-                )
                 handleClicks(clickCount, clickPressed)
 
                 clickCount = 0
