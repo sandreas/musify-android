@@ -12,8 +12,8 @@ import android.support.v4.media.session.MediaSessionCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.codewithfk.musify_android.MainActivity
-import com.codewithfk.musify_android.data.model.Song
 import com.codewithfk.musify_android.data.service.MusifyPlaybackService
+import com.codewithfk.musify_android.mediaSource.api.model.MediaSourceItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -52,7 +52,7 @@ class MusifyNotificationHelper(private val context: Context) {
 
     fun createPlayerNotification(
         isPlaying: Boolean,
-        song: Song, mediaSession: MediaSessionCompat, callBack: (Notification) -> Unit
+        song: MediaSourceItem, mediaSession: MediaSessionCompat, callBack: (Notification) -> Unit
     ) {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -63,7 +63,7 @@ class MusifyNotificationHelper(private val context: Context) {
         )
         val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setContentTitle(song.title)
-            .setContentText(song.artist.name)
+            .setContentText(song.artist)
             .setSmallIcon(com.codewithfk.musify_android.R.drawable.ic_profile)
             .setContentIntent(pendingIntent)
             .setStyle(
@@ -150,7 +150,7 @@ class MusifyNotificationHelper(private val context: Context) {
         val notification = notificationBuilder.build()
         notification.flags = Notification.FLAG_NO_CLEAR or Notification.FLAG_ONGOING_EVENT
         callBack(notification)
-        loadAlbumIcon(notificationBuilder, song.coverImage, callBack)
+        loadAlbumIcon(notificationBuilder, song.cover, callBack)
 
     }
 

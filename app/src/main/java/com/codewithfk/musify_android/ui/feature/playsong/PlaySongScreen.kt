@@ -1,5 +1,6 @@
 package com.codewithfk.musify_android.ui.feature.playsong
 
+import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -63,7 +64,7 @@ fun PlaySongScreen(
                 PlaySongScreenContent(
                     title = data.currentSong.title,
                     genre = data.currentSong.genre,
-                    image = data.currentSong.coverImage,
+                    image = data.currentSong.cover,
                     duration = data.duration,
                     currentPosition = data.currentPosition,
                     isPlaying = data.isPlaying,
@@ -243,6 +244,7 @@ fun SongActions(
 
 }
 
+@SuppressLint("DefaultLocale")
 fun formattedTime(millis: Long): String {
     val duration = millis / 1000
     val minutes = (duration / 60).toInt()

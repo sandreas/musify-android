@@ -8,7 +8,6 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.support.v4.media.MediaMetadataCompat
-import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
@@ -18,8 +17,10 @@ import androidx.media.session.MediaButtonReceiver
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import com.codewithfk.musify_android.data.MusifySession
 import com.codewithfk.musify_android.data.helper.MusifyNotificationHelper
 import com.codewithfk.musify_android.data.model.Song
+import com.codewithfk.musify_android.mediaSource.api.model.MediaSourceItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -654,11 +655,14 @@ class MusifyPlaybackService : Service() {
         // Handle the intent actions here
         when (intent?.action) {
             ACTION_PLAY -> {
+                // sandreas Todo: what is this???
+                // how can an intent contain a custom Class?
                 val song = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    intent.getParcelableExtra(KEY_SONG, Song::class.java)
+                    intent.getParcelableExtra(KEY_SONG, MediaSourceItem::class.java)
                 } else {
-                    intent.getParcelableExtra<Song>(KEY_SONG)
+                    intent.getParcelableExtra<MediaSourceItem>(KEY_SONG)
                 }
+
 
                 if (song != null) {
                     playSong(song)
@@ -693,24 +697,29 @@ class MusifyPlaybackService : Service() {
     }
 
 
-    fun playSong(song: Song) {
+    fun playSong(song: MediaSourceItem) {
         try {
             _player.value = playerState.value.copy(
                 currentSong = song,
                 isBuffering = true,
                 currentPosition = 0L,
-                duration = song.duration.toLong()
+                duration = song.duration.inWholeMilliseconds
             )
             val metaBuilder = MediaMetadataCompat.Builder()
                 .putString(MediaMetadataCompat.METADATA_KEY_TITLE, song.title)
-                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, song.artist.name)
-                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, song.coverImage)
-                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI, song.coverImage)
+                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, song.artist)
+                .putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, song.cover)
+                .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI, song.cover)
                 .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, song.id)
 
             mediaSession.setMetadata(metaBuilder.build())
-            val mediaItem = MediaItem.fromUri(song.audioUrl.toUri())
-            exoPlayer.setMediaItem(mediaItem)
+
+            // val mediaItem = MediaItem.fromUri(song.audioUrl.toUri())
+            // exoPlayer.setMediaItem(mediaItem)
+
+            val mediaItems = song.tracks.map {it -> MediaItem.fromUri(it.url)};
+            exoPlayer.setMediaItems(mediaItems)
+
             exoPlayer.prepare()
             exoPlayer.playWhenReady = true
         } catch (ex: Exception) {
@@ -768,7 +777,7 @@ class MusifyPlaybackService : Service() {
 
 data class PlayerState(
     val isPlaying: Boolean = false,
-    val currentSong: Song? = null,
+    val currentSong: MediaSourceItem? = null,
     val currentPosition: Long = 0L,
     val duration: Long = 0L,
     val error: String? = null,

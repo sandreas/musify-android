@@ -3,11 +3,20 @@ package com.codewithfk.musify_android.data
 import android.content.Context
 import org.koin.core.annotation.Single
 import androidx.core.content.edit
+import com.codewithfk.musify_android.mediaSource.api.MediaSourceInterface
+import com.codewithfk.musify_android.mediaSource.implementation.mock.MockMediaSource
 
 @Single
 class MusifySession(private val context: Context) {
     private val sharedPreferences =
         context.getSharedPreferences("musify_session", Context.MODE_PRIVATE)
+
+
+
+
+
+
+
 
     fun saveToken(token: String) {
         sharedPreferences.edit {
@@ -35,4 +44,7 @@ class MusifySession(private val context: Context) {
         }
     }
 
+    fun getActiveMediaSource(): MediaSourceInterface {
+        return MockMediaSource("mock", "Mock Media Source");
+    }
 }

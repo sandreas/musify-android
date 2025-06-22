@@ -40,6 +40,7 @@ import com.codewithfk.musify_android.R
 import com.codewithfk.musify_android.data.model.Album
 import com.codewithfk.musify_android.data.model.HomeDataResponse
 import com.codewithfk.musify_android.data.model.Song
+import com.codewithfk.musify_android.mediaSource.api.model.MediaSourceItem
 import com.codewithfk.musify_android.ui.feature.widgets.ErrorScreen
 import com.codewithfk.musify_android.ui.feature.widgets.LoadingScreen
 import com.codewithfk.musify_android.ui.feature.widgets.MusifySpacer
@@ -94,7 +95,7 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = koinView
 fun HomeScreenContent(
     name: String,
     data: HomeDataResponse,
-    onSongClicked: (Song) -> Unit,
+    onSongClicked: (MediaSourceItem) -> Unit,
     onAlbumClicked: (Album) -> Unit
 ) {
     Column(
@@ -107,7 +108,7 @@ fun HomeScreenContent(
         MusifySpacer(16.dp)
         TopMixesSection(data.topMixes) {}
         MusifySpacer(16.dp)
-        RecommendationSection(data.recommendedSongs) {}
+        // RecommendationSection(data.recommendedSongs) {}
     }
 
 }
@@ -161,7 +162,7 @@ fun HomeHeader(userName: String, userImage: String?) {
 
 
 @Composable
-fun ColumnScope.ContinueListeningSection(list: List<Song>, onItemClick: (Song) -> Unit) {
+fun ColumnScope.ContinueListeningSection(list: List<MediaSourceItem>, onItemClick: (MediaSourceItem) -> Unit) {
     Text("Continue Listening", style = MaterialTheme.typography.titleLarge)
     MusifySpacer(8.dp)
     LazyVerticalGrid(columns = GridCells.Fixed(2)) {
@@ -179,7 +180,7 @@ fun ColumnScope.ContinueListeningSection(list: List<Song>, onItemClick: (Song) -
 }
 
 @Composable
-fun GridSong(song: Song, modifier: Modifier, onClick: (Song) -> Unit) {
+fun GridSong(song: MediaSourceItem, modifier: Modifier, onClick: (MediaSourceItem) -> Unit) {
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))
@@ -187,9 +188,9 @@ fun GridSong(song: Song, modifier: Modifier, onClick: (Song) -> Unit) {
             .clickable { onClick(song) },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Log.d("GridSong", "song: ${song.coverImage}")
+        Log.d("GridSong", "song: ${song.cover}")
         AsyncImage(
-            model = song.coverImage, contentDescription = null,
+            model = song.cover, contentDescription = null,
             modifier = Modifier
                 .size(50.dp)
                 .clip(RoundedCornerShape(8.dp)),

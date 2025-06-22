@@ -3,11 +3,7 @@ package com.codewithfk.musify_android.ui.feature.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.codewithfk.musify_android.data.MusifySession
-import com.codewithfk.musify_android.data.model.Album
-import com.codewithfk.musify_android.data.model.Artist
 import com.codewithfk.musify_android.data.model.HomeDataResponse
-import com.codewithfk.musify_android.data.model.Song
-import com.codewithfk.musify_android.data.network.Resource
 import com.codewithfk.musify_android.data.repository.HomeRepository
 import com.codewithfk.musify_android.data.repository.MusicRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -25,6 +21,7 @@ class HomeViewModel(private val homeRepository: HomeRepository, private  val mus
 
     private val _event = MutableSharedFlow<HomeEvent>()
     val event = _event.asSharedFlow()
+    val mediaSource = musifySession.getActiveMediaSource()
 
     init {
         // fetchData()
@@ -34,17 +31,10 @@ class HomeViewModel(private val homeRepository: HomeRepository, private  val mus
     fun printSong() {
         viewModelScope.launch {
 
-            val songResource = musicRepo.getSongById("B00UWZKNYQ")
-            var song : Song?
-            when(songResource) {
-                is Resource.Success -> {
-                    song = songResource.data
-                }
 
-                is Resource.Error<*> -> song = null
-            }
-            if(song != null) {
-                val response = HomeDataResponse(mutableListOf(song),mutableListOf(), mutableListOf())
+            val item = mediaSource.getItemById("B00UWZKNYQ")
+            if(item != null) {
+                val response = HomeDataResponse(mutableListOf(item),mutableListOf(), mutableListOf())
                 _state.value = HomeState.Success(response)
             }
 
@@ -54,7 +44,7 @@ class HomeViewModel(private val homeRepository: HomeRepository, private  val mus
     fun getUserName(): String {
         return musifySession.getUserName()?: "Guest"
     }
-
+    /*
     fun fetchData() {
         viewModelScope.launch {
             _state.value = HomeState.Loading
@@ -72,8 +62,10 @@ class HomeViewModel(private val homeRepository: HomeRepository, private  val mus
         }
     }
 
+     */
+
     fun onRetryClicked() {
-        fetchData()
+        // fetchData()
     }
 
     fun onSongClicked(value: String) {

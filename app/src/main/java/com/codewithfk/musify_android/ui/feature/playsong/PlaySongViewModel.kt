@@ -7,11 +7,11 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.codewithfk.musify_android.data.model.Song
-import com.codewithfk.musify_android.data.network.Resource
+import com.codewithfk.musify_android.data.MusifySession
 import com.codewithfk.musify_android.data.repository.MusicRepository
 import com.codewithfk.musify_android.data.service.MusifyPlaybackService
 import com.codewithfk.musify_android.data.service.MusifyPlaybackService.Companion.KEY_SONG
+import com.codewithfk.musify_android.mediaSource.api.model.MediaSourceItem
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
-class PlaySongViewModel(private val repo: MusicRepository, private val context: Context) :
+class PlaySongViewModel(private val repo: MusicRepository, private val session: MusifySession, private val context: Context) :
     ViewModel() {
 
     private val _state = MutableStateFlow<PlaySongState>(PlaySongState.Loading)
@@ -30,10 +30,11 @@ class PlaySongViewModel(private val repo: MusicRepository, private val context: 
 
     private val _event = MutableSharedFlow<PlaySongEvent>()
     val event = _event.asSharedFlow()
+    val mediaSource = session.getActiveMediaSource()
 
     private var playbackService: MusifyPlaybackService? = null
     private var isServiceBound = false
-    private var currentSong: Song? = null
+    private var currentSong: MediaSourceItem? = null
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(
@@ -57,27 +58,24 @@ class PlaySongViewModel(private val repo: MusicRepository, private val context: 
     }
 
     private fun observePlaybackService() {
-        playbackService?.let { service ->
-            service.playerState.onEach {
-                _state.value = PlaySongState.Success(
-                    isPlaying = it.isPlaying,
-                    currentPosition = it.currentPosition.coerceAtLeast(0),
-                    duration = it.duration.coerceAtLeast(0),
-                    currentSong = it.currentSong,
-                    isBuffering = it.isBuffering,
-                    error = it.error
-                )
-            }.launchIn(viewModelScope)
-        }
+        playbackService?.playerState?.onEach {
+            _state.value = PlaySongState.Success(
+                isPlaying = it.isPlaying,
+                currentPosition = it.currentPosition.coerceAtLeast(0),
+                duration = it.duration.coerceAtLeast(0),
+                currentSong = it.currentSong,
+                isBuffering = it.isBuffering,
+                error = it.error
+            )
+        }?.launchIn(viewModelScope)
     }
 
     fun fetchData(songID: String) {
         viewModelScope.launch {
             try {
-                val response = repo.getSongById(songID) // Replace with actual song ID
-                if (response is Resource.Success) {
-                    currentSong = response.data
-                    startServiceAndBind(response.data)
+                val currentSong = mediaSource.getItemById(songID) // Replace with actual song ID
+                if (currentSong != null) {
+                    startServiceAndBind(currentSong)
                 } else {
                     _state.value = PlaySongState.Error("Failed to fetch song data")
                 }
@@ -105,7 +103,7 @@ class PlaySongViewModel(private val repo: MusicRepository, private val context: 
         }
     }
 
-    private fun startServiceAndBind(song: Song) {
+    private fun startServiceAndBind(song: MediaSourceItem) {
         val intent = Intent(context, MusifyPlaybackService::class.java).apply {
             action = MusifyPlaybackService.ACTION_PLAY
             putExtra(KEY_SONG, song)
