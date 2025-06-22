@@ -1,12 +1,17 @@
 package com.codewithfk.musify_android.mediaSource.implementation.navidrome
 
 import com.codewithfk.musify_android.mediaSource.api.MediaSourceAction
+import com.codewithfk.musify_android.mediaSource.api.MediaSourceConfiguration
 import com.codewithfk.musify_android.mediaSource.api.MediaSourceInterface
 import com.codewithfk.musify_android.mediaSource.api.MediaSourceQueryInterface
 import com.codewithfk.musify_android.mediaSource.api.model.MediaSourceItem
 import okhttp3.internal.immutableListOf
 
 class NavidromeMediaSource(override val id: String, override val name: String) : MediaSourceInterface {
+    override suspend fun configure(config: MediaSourceConfiguration): Boolean {
+        return true
+    }
+
     override suspend fun query(query: MediaSourceQueryInterface): List<MediaSourceItem> {
         return immutableListOf()
     }

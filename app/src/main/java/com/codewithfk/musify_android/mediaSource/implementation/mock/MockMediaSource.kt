@@ -2,6 +2,7 @@ package com.codewithfk.musify_android.mediaSource.implementation.mock
 
 import com.codewithfk.musify_android.data.model.Artist
 import com.codewithfk.musify_android.mediaSource.api.MediaSourceAction
+import com.codewithfk.musify_android.mediaSource.api.MediaSourceConfiguration
 import com.codewithfk.musify_android.mediaSource.api.MediaSourceInterface
 import com.codewithfk.musify_android.mediaSource.api.MediaSourceQueryInterface
 import com.codewithfk.musify_android.mediaSource.api.model.MediaSourceItem
@@ -32,6 +33,10 @@ class MockMediaSource(override val id: String, override val name: String) : Medi
             updatedAt = 0L
         )
     )
+
+    override suspend fun configure(config: MediaSourceConfiguration): Boolean {
+        return true
+    }
 
     override suspend fun query(query: MediaSourceQueryInterface): List<MediaSourceItem> {
         return songs

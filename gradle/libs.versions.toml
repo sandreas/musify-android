@@ -3,6 +3,7 @@ agp = "8.9.3"
 coilCompose = "3.2.0"
 converterGson = "2.11.0"
 coreSplashscreen = "1.0.1"
+gson = "2.13.1"
 koinAndroid = "4.0.4"
 koinAnnotations = "2.0.0"
 koinKspCompiler = "2.0.0"
@@ -33,6 +34,7 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coilCompose" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
