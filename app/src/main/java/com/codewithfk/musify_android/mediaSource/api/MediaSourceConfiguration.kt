@@ -14,5 +14,6 @@ data class MediaSourceConfiguration(
     val username: String = "",
     val password: String = "",
     val token: String = "",
+    var active: Boolean = false,
     val extraValues: Map<String, String> = mapOf()
 )

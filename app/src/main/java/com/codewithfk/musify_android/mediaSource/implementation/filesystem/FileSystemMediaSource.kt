@@ -9,7 +9,7 @@ import com.codewithfk.musify_android.mediaSource.implementation.AbstractMediaSou
 import okhttp3.internal.immutableListOf
 
 class FileSystemMediaSource(override val id: String, override val name: String) : AbstractMediaSource(id, name) {
-    override suspend fun configure(config: MediaSourceConfiguration): Boolean {
+    override fun configure(config: MediaSourceConfiguration): Boolean {
         return true
     }
 

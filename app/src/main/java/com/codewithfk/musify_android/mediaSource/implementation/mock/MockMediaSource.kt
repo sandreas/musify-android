@@ -34,7 +34,7 @@ class MockMediaSource(override val id: String, override val name: String) : Abst
         )
     )
 
-    override suspend fun configure(config: MediaSourceConfiguration): Boolean {
+    override fun configure(config: MediaSourceConfiguration): Boolean {
         return true
     }
 

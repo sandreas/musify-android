@@ -1,6 +1,7 @@
 package com.codewithfk.musify_android.data
 
 import android.content.Context
+import android.util.Log
 import org.koin.core.annotation.Single
 import androidx.core.content.edit
 import com.codewithfk.musify_android.mediaSource.api.MediaSourceConfiguration
@@ -21,7 +22,7 @@ class MusifySession(private val context: Context) {
     // The difference is that Dispatchers.Default is limited to the number of CPU cores (with a minimum of 2) so only N (where N == cpu cores) tasks can run in parallel in this dispatcher.
     // On the IO dispatcher there are by default 64 threads, so there could be up to 64 parallel tasks running on that dispatcher.
     // The idea is that the IO dispatcher spends a lot of time waiting (IO blocked), while the Default dispatcher is intended for CPU intensive tasks, where there is little or no sleep.
-    private val sessionScope = CoroutineScope(Dispatchers.Default)
+    // private val sessionScope = CoroutineScope(Dispatchers.Default)
 
     private val gson = Gson()
     private val mediaSources = ArrayList<MediaSourceInterface>()
@@ -32,52 +33,37 @@ class MusifySession(private val context: Context) {
         context.getSharedPreferences("musify_session", Context.MODE_PRIVATE)
 
     init {
+        /*
         sessionScope.launch {
             loadMediaSources()
         }
+
+         */
     }
 
-    private suspend fun loadMediaSources() {
+    fun loadMediaSourceConfigurations(): List<MediaSourceConfiguration>? {
         var mediaSourcesJson = sharedPreferences.getString("mediaSources", null)
         if(mediaSourcesJson == null) {
-            return
+            return null
         }
 
         try {
-            val mediaSourceConfigurations: List<MediaSourceConfiguration> = gson.fromJson<ArrayList<MediaSourceConfiguration>>(mediaSourcesJson,
+            return gson.fromJson<ArrayList<MediaSourceConfiguration>>(mediaSourcesJson,
                 ArrayList::class.java)
+        } catch (e: Exception) {
+            Log.d(this::class.simpleName, "Could not decode mediaSources", e)
+        }
+        return null
+    }
 
-            mediaSourceConfigurations.forEach { it ->
-                val tmpMediaSource = buildMediaSource(it)
-                if(tmpMediaSource != null) {
-                    mediaSources.add(tmpMediaSource)
-                }
-            }
-        } catch (_: Exception) {
-
+    fun saveMediaSourceConfigurations(mediaSources : List<MediaSourceConfiguration>?)  {
+        val toSave = gson.toJson(mediaSources)
+        sharedPreferences.edit {
+            putString("mediaSourceConfigurations", toSave)
         }
     }
 
-    suspend fun buildMediaSource(config: MediaSourceConfiguration): MediaSourceInterface? {
-        var mediaSource : MediaSourceInterface?
-        when(config.type) {
-            AudioBookShelfMediaSource::class.simpleName -> {
-                mediaSource = AudioBookShelfMediaSource(config.id, config.name)
-            } else -> {
-                mediaSource = null
-            }
-        }
-        if(mediaSource == null) {
-            return null
-        }
-        var returnValue: MediaSourceInterface? = null
-        if(mediaSource.configure(config)) {
-            returnValue = mediaSource
-        }
 
-
-        return returnValue
-    }
 
 
     fun saveToken(token: String) {
