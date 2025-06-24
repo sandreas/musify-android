@@ -5,57 +5,78 @@ import org.koin.core.annotation.Single
 import androidx.core.content.edit
 import com.codewithfk.musify_android.mediaSource.api.MediaSourceConfiguration
 import com.codewithfk.musify_android.mediaSource.api.MediaSourceInterface
-import com.codewithfk.musify_android.mediaSource.api.MediaSourceMediaType
+import com.codewithfk.musify_android.mediaSource.implementation.audiobookshelf.AudioBookShelfMediaSource
 import com.codewithfk.musify_android.mediaSource.implementation.mock.MockMediaSource
 import com.google.gson.Gson
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Single
 class MusifySession(private val context: Context) {
-    private val sharedPreferences =
-        context.getSharedPreferences("musify_session", Context.MODE_PRIVATE)
-    private val mediaSources = ArrayList<MediaSourceInterface>()
-    val gson = Gson()
-
-    init {
-        loadMediaSources()
+    companion object {
+        val KEY_ACTIVE_MEDIA_SOURCE_ID = "activeMediaSourceId"
     }
 
-    private fun loadMediaSources() {
+    // The difference is that Dispatchers.Default is limited to the number of CPU cores (with a minimum of 2) so only N (where N == cpu cores) tasks can run in parallel in this dispatcher.
+    // On the IO dispatcher there are by default 64 threads, so there could be up to 64 parallel tasks running on that dispatcher.
+    // The idea is that the IO dispatcher spends a lot of time waiting (IO blocked), while the Default dispatcher is intended for CPU intensive tasks, where there is little or no sleep.
+    private val sessionScope = CoroutineScope(Dispatchers.Default)
+
+    private val gson = Gson()
+    private val mediaSources = ArrayList<MediaSourceInterface>()
+
+
+
+    private val sharedPreferences =
+        context.getSharedPreferences("musify_session", Context.MODE_PRIVATE)
+
+    init {
+        sessionScope.launch {
+            loadMediaSources()
+        }
+    }
+
+    private suspend fun loadMediaSources() {
         var mediaSourcesJson = sharedPreferences.getString("mediaSources", null)
         if(mediaSourcesJson == null) {
             return
         }
 
         try {
-            val list: List<MediaSourceConfiguration> = gson.fromJson<ArrayList<MediaSourceConfiguration>>(mediaSourcesJson,
+            val mediaSourceConfigurations: List<MediaSourceConfiguration> = gson.fromJson<ArrayList<MediaSourceConfiguration>>(mediaSourcesJson,
                 ArrayList::class.java)
 
-                /*Json.decodeFromString(
-                MediaSourceConfiguration.serializer(),
-                mediaSourcesJson
-            );*/
-            // mediaSources.addAll();
+            mediaSourceConfigurations.forEach { it ->
+                val tmpMediaSource = buildMediaSource(it)
+                if(tmpMediaSource != null) {
+                    mediaSources.add(tmpMediaSource)
+                }
+            }
+        } catch (_: Exception) {
 
-        } catch (e: Exception) {
+        }
+    }
 
+    suspend fun buildMediaSource(config: MediaSourceConfiguration): MediaSourceInterface? {
+        var mediaSource : MediaSourceInterface?
+        when(config.type) {
+            AudioBookShelfMediaSource::class.simpleName -> {
+                mediaSource = AudioBookShelfMediaSource(config.id, config.name)
+            } else -> {
+                mediaSource = null
+            }
+        }
+        if(mediaSource == null) {
+            return null
+        }
+        var returnValue: MediaSourceInterface? = null
+        if(mediaSource.configure(config)) {
+            returnValue = mediaSource
         }
 
 
-
-        /*
-        // serializing objects
-        val jsonData = Json.encodeToString(MyModel.serializer(), MyModel(42))
-        println(jsonData) // {"a": 42, "b": "42"}
-
-        // serializing lists
-        val jsonList = Json.encodeToString(MyModel.serializer().list, listOf(MyModel(42)))
-        println(jsonList) // [{"a": 42, "b": "42"}]
-
-        // parsing data back
-        val obj = Json.decodeFromString(MyModel.serializer(), """{"a":42}""")
-        println(obj) // MyModel(a=42, b="42")
-
-         */
+        return returnValue
     }
 
 
@@ -80,13 +101,25 @@ class MusifySession(private val context: Context) {
     }
 
     fun clearSession() {
-        sharedPreferences.edit() {
+        sharedPreferences.edit {
             clear()
         }
     }
 
-    fun getActiveMediaSource(): MediaSourceInterface {
 
-        return MockMediaSource("mock", "Mock Media Source");
+    fun setActiveMediaSource(id: String) {
+        sharedPreferences.edit {
+            putString(KEY_ACTIVE_MEDIA_SOURCE_ID, id)
+        }
+    }
+
+    fun getActiveMediaSource(): MediaSourceInterface? {
+        val activeId = sharedPreferences.getString(KEY_ACTIVE_MEDIA_SOURCE_ID, "")
+        val activeMediaSource = mediaSources.find { it -> activeId == it.id}
+        if(activeMediaSource != null) {
+            return activeMediaSource
+        }
+
+        return mediaSources.firstOrNull()
     }
 }

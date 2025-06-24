@@ -58,6 +58,7 @@ class MainActivity : ComponentActivity() {
                     Box(modifier = Modifier.padding(innerPadding)) {
                         AppNavGraph(
                             navController = rememberNavController(),
+                            // check
                             startDestination = HomeRoute // if(mainViewModel.isUserLoggedIn()) HomeRoute else OnboardingRoute
                         )
                     }

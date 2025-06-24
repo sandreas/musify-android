@@ -12,14 +12,11 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.view.KeyEvent
-import androidx.core.net.toUri
 import androidx.media.session.MediaButtonReceiver
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
-import com.codewithfk.musify_android.data.MusifySession
 import com.codewithfk.musify_android.data.helper.MusifyNotificationHelper
-import com.codewithfk.musify_android.data.model.Song
 import com.codewithfk.musify_android.mediaSource.api.model.MediaSourceItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,7 +30,6 @@ import org.koin.android.ext.android.inject
 import kotlin.time.Duration.Companion.milliseconds
 
 class MusifyPlaybackService : Service() {
-
     companion object {
         const val ACTION_PLAY = "com.codewithfk.musify_android.ACTION_PLAY"
         const val ACTION_PAUSE = "com.codewithfk.musify_android.ACTION_PAUSE"
@@ -213,67 +209,6 @@ class MusifyPlaybackService : Service() {
         var stopSeeking = false
         var clickJob: Job? = null
 
-
-
-        /*
-        public boolean onMediaButtonEvent(Intent mediaButtonEvent) {
-            if (android.os.Build.VERSION.SDK_INT >= 27) {
-                // Double tap of play/pause as skipping to next is already handled by framework,
-                // so we don't need to repeat again here.
-                // Note: Double tap would be handled twice for OC-DR1 whose SDK version 26 and
-                //       framework handles the double tap.
-                return false;
-            }
-            MediaSessionImpl impl;
-            Handler callbackHandler;
-            synchronized (mLock) {
-                impl = mSessionImpl.get();
-                callbackHandler = mCallbackHandler;
-            }
-            if (impl == null || callbackHandler == null) {
-                return false;
-            }
-            KeyEvent keyEvent = mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
-            if (keyEvent == null || keyEvent.getAction() != KeyEvent.ACTION_DOWN) {
-                return false;
-            }
-            RemoteUserInfo remoteUserInfo = impl.getCurrentControllerInfo();
-            int keyCode = keyEvent.getKeyCode();
-            switch (keyCode) {
-                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                case KeyEvent.KEYCODE_HEADSETHOOK:
-                    if (keyEvent.getRepeatCount() == 0) {
-                        if (mMediaPlayPausePendingOnHandler) {
-                            callbackHandler.removeMessages(
-                                    CallbackHandler.MSG_MEDIA_PLAY_PAUSE_KEY_DOUBLE_TAP_TIMEOUT);
-                            mMediaPlayPausePendingOnHandler = false;
-                            PlaybackStateCompat state = impl.getPlaybackState();
-                            long validActions = state == null ? 0 : state.getActions();
-                            // Consider double tap as the next.
-                            if ((validActions & PlaybackStateCompat.ACTION_SKIP_TO_NEXT) != 0) {
-                                onSkipToNext();
-                            }
-                        } else {
-                            mMediaPlayPausePendingOnHandler = true;
-                            callbackHandler.sendMessageDelayed(callbackHandler.obtainMessage(
-                                    CallbackHandler.MSG_MEDIA_PLAY_PAUSE_KEY_DOUBLE_TAP_TIMEOUT,
-                                    remoteUserInfo),
-                                    ViewConfiguration.getDoubleTapTimeout());
-                        }
-                    } else {
-                        // Consider long-press as a single tap.
-                        handleMediaPlayPauseIfPendingOnHandler(impl, callbackHandler);
-                    }
-                    return true;
-                default:
-                    // If another key is pressed within double tap timeout, consider the pending
-                    // pending play/pause as a single tap to handle media keys in order.
-                    handleMediaPlayPauseIfPendingOnHandler(impl, callbackHandler);
-                    break;
-            }
-            return false;
-        }
-         */
 
 
         override fun onMediaButtonEvent(intent: Intent): Boolean {
@@ -544,7 +479,7 @@ class MusifyPlaybackService : Service() {
             it.addListener(playerListener)
         }
 
-        mediaSession = MediaSessionCompat(this, "MusifyPlaybackService").also {
+        mediaSession = MediaSessionCompat(this, MusifyPlaybackService::class.simpleName?:"MusifyPlaybackService").also {
             it.isActive = true
             it.setCallback(mediaSessionCallBack)
 
@@ -573,7 +508,7 @@ class MusifyPlaybackService : Service() {
                         error = null
                     )
                 }
-                kotlinx.coroutines.delay(500)
+                delay(500)
             }
         }
     }

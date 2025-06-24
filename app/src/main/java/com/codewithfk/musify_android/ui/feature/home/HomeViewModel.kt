@@ -32,7 +32,7 @@ class HomeViewModel(private val homeRepository: HomeRepository, private  val mus
         viewModelScope.launch {
 
 
-            val item = mediaSource.getItemById("B00UWZKNYQ")
+            val item = mediaSource?.getItemById("B00UWZKNYQ")
             if(item != null) {
                 val response = HomeDataResponse(mutableListOf(item),mutableListOf(), mutableListOf())
                 _state.value = HomeState.Success(response)

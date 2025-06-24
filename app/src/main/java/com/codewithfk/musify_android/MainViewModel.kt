@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.codewithfk.musify_android.data.MusifySession
 import com.codewithfk.musify_android.data.repository.StatusRepository
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 
@@ -14,18 +13,27 @@ class MainViewModel(val repository: StatusRepository, val musifySession: MusifyS
     ViewModel() {
 
     private val state = MutableStateFlow("")
-    val status = state.asStateFlow()
+    // val status = state.asStateFlow()
 
     init {
-        getStatus()
+        restoreLastSession()
     }
 
     fun isUserLoggedIn(): Boolean {
         return musifySession.getToken() != null
     }
 
-    private fun getStatus() {
+    private fun restoreLastSession() {
         viewModelScope.launch {
+
+            // todo
+            // - integrate "addMediaSourceConfig" and "updateMediaSourceConfig"
+            // - change "getActiveMediaSource" to getActiveMediaSourceConfig
+            // - add "
+            val mediaSource = musifySession.getActiveMediaSource()
+            if (mediaSource != null) {
+
+            }
             val result = repository.getStatus()
             state.value = result
         }

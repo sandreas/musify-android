@@ -5,9 +5,11 @@ import com.codewithfk.musify_android.mediaSource.api.MediaSourceConfiguration
 import com.codewithfk.musify_android.mediaSource.api.MediaSourceInterface
 import com.codewithfk.musify_android.mediaSource.api.MediaSourceQueryInterface
 import com.codewithfk.musify_android.mediaSource.api.model.MediaSourceItem
+import com.codewithfk.musify_android.mediaSource.implementation.AbstractMediaSource
 import okhttp3.internal.immutableListOf
 
-class AudioBookShelfMediaSource(override val id: String, override val name: String) : MediaSourceInterface {
+class AudioBookShelfMediaSource(override val id: String, override val name: String) :
+    AbstractMediaSource(id, name) {
     override suspend fun configure(config: MediaSourceConfiguration): Boolean {
         return true
     }

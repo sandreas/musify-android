@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
-class PlaySongViewModel(private val repo: MusicRepository, private val session: MusifySession, private val context: Context) :
+class PlaySongViewModel(private val context: Context, private var playbackService: MusifyPlaybackService?, private val session: MusifySession) :
     ViewModel() {
 
     private val _state = MutableStateFlow<PlaySongState>(PlaySongState.Loading)
@@ -32,7 +32,6 @@ class PlaySongViewModel(private val repo: MusicRepository, private val session: 
     val event = _event.asSharedFlow()
     val mediaSource = session.getActiveMediaSource()
 
-    private var playbackService: MusifyPlaybackService? = null
     private var isServiceBound = false
     private var currentSong: MediaSourceItem? = null
 
@@ -42,7 +41,6 @@ class PlaySongViewModel(private val repo: MusicRepository, private val session: 
             binder: IBinder?
         ) {
             isServiceBound = true
-            playbackService = (binder as MusifyPlaybackService.MusicBinder).getService()
             observePlaybackService()
             currentSong?.let {
                 playbackService?.playSong(it)
@@ -73,7 +71,7 @@ class PlaySongViewModel(private val repo: MusicRepository, private val session: 
     fun fetchData(songID: String) {
         viewModelScope.launch {
             try {
-                val currentSong = mediaSource.getItemById(songID) // Replace with actual song ID
+                val currentSong = mediaSource?.getItemById(songID) // Replace with actual song ID
                 if (currentSong != null) {
                     startServiceAndBind(currentSong)
                 } else {

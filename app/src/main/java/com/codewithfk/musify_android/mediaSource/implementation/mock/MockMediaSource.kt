@@ -1,6 +1,5 @@
 package com.codewithfk.musify_android.mediaSource.implementation.mock
 
-import com.codewithfk.musify_android.data.model.Artist
 import com.codewithfk.musify_android.mediaSource.api.MediaSourceAction
 import com.codewithfk.musify_android.mediaSource.api.MediaSourceConfiguration
 import com.codewithfk.musify_android.mediaSource.api.MediaSourceInterface
@@ -8,10 +7,11 @@ import com.codewithfk.musify_android.mediaSource.api.MediaSourceQueryInterface
 import com.codewithfk.musify_android.mediaSource.api.model.MediaSourceItem
 import com.codewithfk.musify_android.mediaSource.api.model.MediaSourcePerson
 import com.codewithfk.musify_android.mediaSource.api.model.MediaSourceTrack
+import com.codewithfk.musify_android.mediaSource.implementation.AbstractMediaSource
 import okhttp3.internal.immutableListOf
 import kotlin.time.Duration.Companion.milliseconds
 
-class MockMediaSource(override val id: String, override val name: String) : MediaSourceInterface {
+class MockMediaSource(override val id: String, override val name: String) : AbstractMediaSource(id, name) {
     val artists = immutableListOf(
         MediaSourcePerson(id="1", name="Peter Packet", bio="Peter Packet's bio", profilePicture="", createdAt=0L, updatedAt=0L)
     )

@@ -7,6 +7,7 @@ import kotlinx.serialization.json.Json
 @Serializable
 data class MediaSourceConfiguration(
     val id: String = "",
+    val name: String = "",
     val type: String? = this::class.simpleName,
     val mediaTypes: List<MediaSourceMediaType> = immutableListOf(),
     val url: String = "",
