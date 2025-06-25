@@ -5,18 +5,15 @@ import android.util.Log
 import org.koin.core.annotation.Single
 import androidx.core.content.edit
 import com.codewithfk.musify_android.mediaSource.api.MediaSourceConfiguration
-import com.codewithfk.musify_android.mediaSource.api.MediaSourceInterface
-import com.codewithfk.musify_android.mediaSource.implementation.audiobookshelf.AudioBookShelfMediaSource
-import com.codewithfk.musify_android.mediaSource.implementation.mock.MockMediaSource
+import com.codewithfk.musify_android.mediaSource.api.interfaces.MediaSourceInterface
+import com.codewithfk.musify_android.mediaSource.api.interfaces.MediaSourceStorageInterface
 import com.google.gson.Gson
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 @Single
-class MusifySession(private val context: Context) {
+class MusifySession(private val context: Context): MediaSourceStorageInterface {
     companion object {
-        val KEY_ACTIVE_MEDIA_SOURCE_ID = "activeMediaSourceId"
+        val KEY_SHARED_PREFERENCES = "musify_session"
+        val KEY_MEDIA_SOURCE_CONFIGURATIONS = "mediaSourceConfigurations"
     }
 
     // The difference is that Dispatchers.Default is limited to the number of CPU cores (with a minimum of 2) so only N (where N == cpu cores) tasks can run in parallel in this dispatcher.
@@ -30,7 +27,7 @@ class MusifySession(private val context: Context) {
 
 
     private val sharedPreferences =
-        context.getSharedPreferences("musify_session", Context.MODE_PRIVATE)
+        context.getSharedPreferences(KEY_SHARED_PREFERENCES, Context.MODE_PRIVATE)
 
     init {
         /*
@@ -41,14 +38,14 @@ class MusifySession(private val context: Context) {
          */
     }
 
-    fun loadMediaSourceConfigurations(): List<MediaSourceConfiguration>? {
-        var mediaSourcesJson = sharedPreferences.getString("mediaSources", null)
-        if(mediaSourcesJson == null) {
+    override fun loadMediaSourceConfigurations(): List<MediaSourceConfiguration>? {
+        var mediaSourceConfigurationsJson = sharedPreferences.getString(KEY_MEDIA_SOURCE_CONFIGURATIONS, null)
+        if(mediaSourceConfigurationsJson == null) {
             return null
         }
 
         try {
-            return gson.fromJson<ArrayList<MediaSourceConfiguration>>(mediaSourcesJson,
+            return gson.fromJson<ArrayList<MediaSourceConfiguration>>(mediaSourceConfigurationsJson,
                 ArrayList::class.java)
         } catch (e: Exception) {
             Log.d(this::class.simpleName, "Could not decode mediaSources", e)
@@ -56,14 +53,12 @@ class MusifySession(private val context: Context) {
         return null
     }
 
-    fun saveMediaSourceConfigurations(mediaSources : List<MediaSourceConfiguration>?)  {
-        val toSave = gson.toJson(mediaSources)
+    override fun saveMediaSourceConfigurations(mediaSourceConfigurations : List<MediaSourceConfiguration>?)  {
+        val toSave = gson.toJson(mediaSourceConfigurations)
         sharedPreferences.edit {
-            putString("mediaSourceConfigurations", toSave)
+            putString(KEY_MEDIA_SOURCE_CONFIGURATIONS, toSave)
         }
     }
-
-
 
 
     fun saveToken(token: String) {
@@ -90,22 +85,5 @@ class MusifySession(private val context: Context) {
         sharedPreferences.edit {
             clear()
         }
-    }
-
-
-    fun setActiveMediaSource(id: String) {
-        sharedPreferences.edit {
-            putString(KEY_ACTIVE_MEDIA_SOURCE_ID, id)
-        }
-    }
-
-    fun getActiveMediaSource(): MediaSourceInterface? {
-        val activeId = sharedPreferences.getString(KEY_ACTIVE_MEDIA_SOURCE_ID, "")
-        val activeMediaSource = mediaSources.find { it -> activeId == it.id}
-        if(activeMediaSource != null) {
-            return activeMediaSource
-        }
-
-        return mediaSources.firstOrNull()
     }
 }

@@ -6,6 +6,7 @@ import com.codewithfk.musify_android.data.MusifySession
 import com.codewithfk.musify_android.data.model.HomeDataResponse
 import com.codewithfk.musify_android.data.repository.HomeRepository
 import com.codewithfk.musify_android.data.repository.MusicRepository
+import com.codewithfk.musify_android.mediaSource.api.MediaSourceConfigurationRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,14 +15,14 @@ import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
-class HomeViewModel(private val homeRepository: HomeRepository, private  val musifySession: MusifySession, private val musicRepo: MusicRepository) : ViewModel() {
+class HomeViewModel(private val homeRepository: HomeRepository, private val mediaSourceRepo: MediaSourceConfigurationRepository, private  val musifySession: MusifySession, private val musicRepo: MusicRepository) : ViewModel() {
 
     private val _state = MutableStateFlow<HomeState>(HomeState.Loading)
     val state: StateFlow<HomeState> = _state
 
     private val _event = MutableSharedFlow<HomeEvent>()
     val event = _event.asSharedFlow()
-    val mediaSource = musifySession.getActiveMediaSource()
+    val mediaSource = mediaSourceRepo.getActiveMediaSource()
 
     init {
         // fetchData()

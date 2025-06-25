@@ -2,16 +2,16 @@ package com.codewithfk.musify_android.mediaSource.implementation.audiobookshelf
 
 import com.codewithfk.musify_android.mediaSource.api.MediaSourceAction
 import com.codewithfk.musify_android.mediaSource.api.MediaSourceConfiguration
-import com.codewithfk.musify_android.mediaSource.api.MediaSourceInterface
-import com.codewithfk.musify_android.mediaSource.api.MediaSourceQueryInterface
+import com.codewithfk.musify_android.mediaSource.api.interfaces.MediaSourceInterface
+import com.codewithfk.musify_android.mediaSource.api.interfaces.MediaSourceQueryInterface
 import com.codewithfk.musify_android.mediaSource.api.model.MediaSourceItem
 import com.codewithfk.musify_android.mediaSource.implementation.AbstractMediaSource
 import okhttp3.internal.immutableListOf
 
 class AudioBookShelfMediaSource(override val id: String, override val name: String) :
     AbstractMediaSource(id, name) {
-    override fun configure(config: MediaSourceConfiguration): Boolean {
-        return true
+    override fun configure(config: MediaSourceConfiguration): MediaSourceInterface? {
+        return this
     }
 
     override suspend fun query(query: MediaSourceQueryInterface): List<MediaSourceItem> {

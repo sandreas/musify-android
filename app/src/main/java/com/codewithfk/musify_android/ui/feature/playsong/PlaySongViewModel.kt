@@ -11,6 +11,7 @@ import com.codewithfk.musify_android.data.MusifySession
 import com.codewithfk.musify_android.data.repository.MusicRepository
 import com.codewithfk.musify_android.data.service.MusifyPlaybackService
 import com.codewithfk.musify_android.data.service.MusifyPlaybackService.Companion.KEY_SONG
+import com.codewithfk.musify_android.mediaSource.api.MediaSourceConfigurationRepository
 import com.codewithfk.musify_android.mediaSource.api.model.MediaSourceItem
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +23,7 @@ import kotlinx.coroutines.launch
 import org.koin.android.annotation.KoinViewModel
 
 @KoinViewModel
-class PlaySongViewModel(private val context: Context, private var playbackService: MusifyPlaybackService?, private val session: MusifySession) :
+class PlaySongViewModel(private val context: Context, private var playbackService: MusifyPlaybackService?, private val session: MusifySession, private val mediaSourceRepo: MediaSourceConfigurationRepository) :
     ViewModel() {
 
     private val _state = MutableStateFlow<PlaySongState>(PlaySongState.Loading)
@@ -30,7 +31,7 @@ class PlaySongViewModel(private val context: Context, private var playbackServic
 
     private val _event = MutableSharedFlow<PlaySongEvent>()
     val event = _event.asSharedFlow()
-    val mediaSource = session.getActiveMediaSource()
+    val mediaSource = mediaSourceRepo.getActiveMediaSource()
 
     private var isServiceBound = false
     private var currentSong: MediaSourceItem? = null
